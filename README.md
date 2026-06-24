@@ -53,26 +53,6 @@ npm run dev
 
 Frontend runs at `http://localhost:5173`.
 
-## Default dev credentials
-
-| Email | Password |
-|-------|----------|
-| admin@maya.local | Admin123! |
-
-## API overview
-
-| Method | Route | Description |
-|--------|-------|-------------|
-| POST | `/api/auth/login` | Login |
-| POST | `/api/auth/register` | Register (dev) |
-| GET | `/api/auth/me` | Current user |
-| GET | `/api/templates` | List templates |
-| POST | `/api/templates` | Create template |
-| GET | `/api/templates/:id` | Get template |
-| PUT | `/api/templates/:id` | Update template |
-| DELETE | `/api/templates/:id` | Delete template |
-
-All template routes require `Authorization: Bearer <token>`.
 
 ## Project structure
 
