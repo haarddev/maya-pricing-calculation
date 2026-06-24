@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Rubik", "Heebo", ui-sans-serif, system-ui, sans-serif;
+  --color-brand-50: #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #4338ca;
+  --color-brand-900: #312e81;
+}
+
+@layer base {
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply min-h-screen bg-slate-50 text-slate-900;
+  }
+
+  [dir="rtl"] body {
+    font-family: "Heebo", "Rubik", ui-sans-serif, system-ui, sans-serif;
+  }
+
+  [dir="ltr"] body {
+    font-family: "Rubik", "Roboto", ui-sans-serif, system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply border border-white/20 bg-white/80 backdrop-blur-xl;
+  }
+}

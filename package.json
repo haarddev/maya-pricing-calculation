@@ -1,0 +1,16 @@
+{
+  "name": "maya-pricing-calculation",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/start-dev.mjs",
+    "db:up": "docker compose up -d",
+    "prisma:generate": "npm --prefix backend exec prisma generate",
+    "prisma:migrate": "npm --prefix backend exec prisma migrate deploy",
+    "prisma:studio": "npm --prefix backend run prisma:studio",
+    "backend:dev": "npm --prefix backend run dev",
+    "frontend:dev": "npm --prefix frontend run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}

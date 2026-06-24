@@ -1,0 +1,120 @@
+import bcrypt from 'bcryptjs';
+import { PrismaClient, TemplateStatus } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+async function main() {
+  const passwordHash = await bcrypt.hash('Admin123!', 10);
+
+  const admin = await prisma.user.upsert({
+    where: { email: 'admin@maya.local' },
+    update: {},
+    create: {
+      email: 'admin@maya.local',
+      passwordHash,
+      name: 'Admin User',
+    },
+  });
+
+  const existingTemplates = await prisma.template.count();
+  if (existingTemplates === 0) {
+    await prisma.template.create({
+      data: {
+        name: 'Distance Pricing - Tel Aviv Routes',
+        description: 'Price per kilometer based on route number',
+        status: TemplateStatus.ACTIVE,
+        pricingMethod: 'PRICE_BY_DISTANCE',
+        createdById: admin.id,
+        fields: {
+          create: [
+            {
+              fieldKey: 'route_number',
+              labelEn: 'Route / Line Number',
+              labelHe: 'מספר קו',
+              fieldType: 'TEXT',
+              sortOrder: 0,
+            },
+            {
+              fieldKey: 'price_per_km',
+              labelEn: 'Price per Kilometer',
+              labelHe: 'מחיר לקילומטר',
+              fieldType: 'NUMBER',
+              sortOrder: 1,
+            },
+          ],
+        },
+      },
+    });
+
+    await prisma.template.create({
+      data: {
+        name: 'Destination & Vehicle Pricing',
+        description: 'Fixed price by destination and vehicle type',
+        status: TemplateStatus.ACTIVE,
+        pricingMethod: 'PRICE_BY_DESTINATION',
+        createdById: admin.id,
+        fields: {
+          create: [
+            {
+              fieldKey: 'destination',
+              labelEn: 'Destination',
+              labelHe: 'יעד',
+              fieldType: 'TEXT',
+              sortOrder: 0,
+            },
+            {
+              fieldKey: 'vehicle_type',
+              labelEn: 'Vehicle Type',
+              labelHe: 'סוג רכב',
+              fieldType: 'DROPDOWN',
+              options: ['Sedan', 'Van', 'Bus', 'Minibus'],
+              sortOrder: 1,
+            },
+            {
+              fieldKey: 'price',
+              labelEn: 'Price',
+              labelHe: 'מחיר',
+              fieldType: 'NUMBER',
+              sortOrder: 2,
+            },
+          ],
+        },
+      },
+    });
+  }
+
+  const existingCatalogs = await prisma.catalog.count();
+  if (existingCatalogs === 0) {
+    const distanceTemplate = await prisma.template.findFirst({
+      where: { pricingMethod: 'PRICE_BY_DISTANCE' },
+    });
+
+    if (distanceTemplate) {
+      await prisma.catalog.create({
+        data: {
+          name: 'Line 5 - Tel Aviv North',
+          description: 'Distance pricing for route line 5',
+          status: 'ACTIVE',
+          templateId: distanceTemplate.id,
+          fieldValues: {
+            route_number: '5',
+            price_per_km: 4.5,
+          },
+          calculatedPrice: 4.5,
+          createdById: admin.id,
+        },
+      });
+    }
+  }
+
+  console.log('Seed completed');
+}
+
+main()
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

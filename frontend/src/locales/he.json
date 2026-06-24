@@ -1,0 +1,128 @@
+{
+  "app": {
+    "title": "Maya Pricing",
+    "logout": "התנתקות"
+  },
+  "nav": {
+    "templates": "תבניות",
+    "catalogs": "קטלוגים"
+  },
+  "auth": {
+    "loginTitle": "התחברות למערכת Maya Pricing",
+    "email": "אימייל",
+    "password": "סיסמה",
+    "login": "התחבר",
+    "loginError": "אימייל או סיסמה שגויים",
+    "welcome": "ברוך הבא, {{name}}"
+  },
+  "language": {
+    "en": "English",
+    "he": "עברית"
+  },
+  "templates": {
+    "title": "ניהול תבניות",
+    "create": "יצירת תבנית",
+    "edit": "עריכת תבנית",
+    "new": "תבנית חדשה",
+    "name": "שם תבנית",
+    "description": "תיאור",
+    "status": "סטטוס",
+    "type": "שיטת תמחור",
+    "fieldCount": "שדות",
+    "createdAt": "נוצר",
+    "updatedAt": "עודכן",
+    "actions": "פעולות",
+    "view": "צפייה",
+    "delete": "מחיקה",
+    "save": "שמירה",
+    "cancel": "ביטול",
+    "search": "חיפוש לפי שם",
+    "filterStatus": "סינון לפי סטטוס",
+    "filterType": "סינון לפי סוג",
+    "all": "הכל",
+    "noResults": "לא נמצאו תבניות",
+    "deleteTitle": "מחיקת תבנית",
+    "deleteConfirm": "האם אתה בטוח שברצונך למחוק תבנית זו?",
+    "deleteConfirmNamed": "האם אתה בטוח שברצונך למחוק את \"{{name}}\"? פעולה זו לא ניתנת לביטול.",
+    "fieldsTitle": "שדות תבנית",
+    "addField": "הוספת שדה",
+    "fieldKey": "מפתח שדה",
+    "labelEn": "תווית (אנגלית)",
+    "labelHe": "תווית (עברית)",
+    "fieldType": "סוג שדה",
+    "required": "חובה",
+    "options": "אפשרויות (מופרדות בפסיק)",
+    "createdBy": "נוצר על ידי"
+  },
+  "catalogs": {
+    "title": "קטלוגי תמחור",
+    "subtitle": "יצירת כללי תמחור מתבניות פעילות",
+    "create": "יצירת קטלוג",
+    "edit": "עריכת קטלוג",
+    "new": "קטלוג חדש",
+    "name": "שם קטלוג",
+    "description": "תיאור",
+    "status": "סטטוס",
+    "template": "תבנית",
+    "type": "שיטת תמחור",
+    "selectTemplate": "בחירת תבנית",
+    "chooseTemplate": "בחר תבנית...",
+    "selectTemplateFirst": "יש לבחור תבנית תחילה",
+    "basicInfo": "פרטי קטלוג",
+    "fieldValues": "ערכי תמחור",
+    "formSubtitle": "בחר תבנית והזן ערכים ליצירת קטלוג תמחור",
+    "calculatedPrice": "מחיר מחושב",
+    "priceHint": "המחיר מחושב אוטומטית לפי שיטת התמחור של התבנית והערכים שהוזנו.",
+    "fieldRequired": "שדה זה הוא חובה",
+    "updatedAt": "עודכן",
+    "actions": "פעולות",
+    "view": "צפייה",
+    "delete": "מחיקה",
+    "save": "שמירה",
+    "cancel": "ביטול",
+    "search": "חיפוש לפי שם",
+    "filterStatus": "סינון לפי סטטוס",
+    "filterTemplate": "סינון לפי תבנית",
+    "all": "הכל",
+    "noResults": "לא נמצאו קטלוגים",
+    "deleteTitle": "מחיקת קטלוג",
+    "deleteConfirm": "האם אתה בטוח שברצונך למחוק את \"{{name}}\"? פעולה זו לא ניתנת לביטול.",
+    "download": "הורדה",
+    "downloadCsv": "הורד CSV",
+    "downloadJson": "הורד JSON",
+    "downloadAll": "ייצוא קטלוגים",
+    "createdAt": "נוצר"
+  },
+  "catalogStatus": {
+    "ACTIVE": "פעיל",
+    "DISABLED": "מושבת",
+    "DRAFT": "טיוטה"
+  },
+  "status": {
+    "ACTIVE": "פעיל",
+    "DISABLED": "מושבת",
+    "DRAFT": "טיוטה",
+    "EXPIRED": "פג תוקף"
+  },
+  "pricingMethod": {
+    "PRICE_BY_DESTINATION": "מחיר לפי יעד וסוג רכב",
+    "PRICE_BY_HOURS": "מחיר לפי שעות",
+    "PRICE_BY_ROUTE": "מחיר לפי מסלול",
+    "PRICE_BY_DISTANCE": "מחיר לפי מרחק",
+    "PRICE_BY_AREA": "מחיר לפי אזור"
+  },
+  "fieldType": {
+    "TEXT": "טקסט",
+    "NUMBER": "מספר",
+    "DROPDOWN": "רשימה נפתחת",
+    "BOOLEAN": "כן/לא",
+    "DATE": "תאריך",
+    "TIME": "שעה"
+  },
+  "common": {
+    "loading": "טוען...",
+    "error": "משהו השתבש",
+    "yes": "כן",
+    "no": "לא"
+  }
+}

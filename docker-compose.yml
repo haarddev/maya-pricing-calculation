@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: maya-pricing-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: maya
+      POSTGRES_PASSWORD: maya
+      POSTGRES_DB: maya_pricing
+    ports:
+      - "5433:5432"
+    volumes:
+      - maya_pricing_data:/var/lib/postgresql/data
+
+volumes:
+  maya_pricing_data:

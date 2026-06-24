@@ -1,0 +1,128 @@
+{
+  "app": {
+    "title": "Maya Pricing",
+    "logout": "Logout"
+  },
+  "nav": {
+    "templates": "Templates",
+    "catalogs": "Catalogs"
+  },
+  "auth": {
+    "loginTitle": "Sign in to Maya Pricing",
+    "email": "Email",
+    "password": "Password",
+    "login": "Sign In",
+    "loginError": "Invalid email or password",
+    "welcome": "Welcome, {{name}}"
+  },
+  "language": {
+    "en": "English",
+    "he": "עברית"
+  },
+  "templates": {
+    "title": "Template Management",
+    "create": "Create Template",
+    "edit": "Edit Template",
+    "new": "New Template",
+    "name": "Template Name",
+    "description": "Description",
+    "status": "Status",
+    "type": "Pricing Method",
+    "fieldCount": "Fields",
+    "createdAt": "Created",
+    "updatedAt": "Updated",
+    "actions": "Actions",
+    "view": "View",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "search": "Search by name",
+    "filterStatus": "Filter by status",
+    "filterType": "Filter by type",
+    "all": "All",
+    "noResults": "No templates found",
+    "deleteTitle": "Delete Template",
+    "deleteConfirm": "Are you sure you want to delete this template?",
+    "deleteConfirmNamed": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+    "fieldsTitle": "Template Fields",
+    "addField": "Add Field",
+    "fieldKey": "Field Key",
+    "labelEn": "Label (English)",
+    "labelHe": "Label (Hebrew)",
+    "fieldType": "Field Type",
+    "required": "Required",
+    "options": "Options (comma separated)",
+    "createdBy": "Created by"
+  },
+  "catalogs": {
+    "title": "Pricing Catalogs",
+    "subtitle": "Create pricing rules from your active templates",
+    "create": "Create Catalog",
+    "edit": "Edit Catalog",
+    "new": "New Catalog",
+    "name": "Catalog Name",
+    "description": "Description",
+    "status": "Status",
+    "template": "Template",
+    "type": "Pricing Method",
+    "selectTemplate": "Select Template",
+    "chooseTemplate": "Choose a template...",
+    "selectTemplateFirst": "Please select a template first",
+    "basicInfo": "Catalog Details",
+    "fieldValues": "Pricing Values",
+    "formSubtitle": "Select a template and enter values to build your pricing catalog",
+    "calculatedPrice": "Calculated Price",
+    "priceHint": "Price is calculated automatically based on the template pricing method and entered values.",
+    "fieldRequired": "This field is required",
+    "updatedAt": "Updated",
+    "actions": "Actions",
+    "view": "View",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "search": "Search by name",
+    "filterStatus": "Filter by status",
+    "filterTemplate": "Filter by template",
+    "all": "All",
+    "noResults": "No catalogs found",
+    "deleteTitle": "Delete Catalog",
+    "deleteConfirm": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+    "download": "Download",
+    "downloadCsv": "Download CSV",
+    "downloadJson": "Download JSON",
+    "downloadAll": "Export Catalogs",
+    "createdAt": "Created"
+  },
+  "catalogStatus": {
+    "ACTIVE": "Active",
+    "DISABLED": "Disabled",
+    "DRAFT": "Draft"
+  },
+  "status": {
+    "ACTIVE": "Active",
+    "DISABLED": "Disabled",
+    "DRAFT": "Draft",
+    "EXPIRED": "Expired"
+  },
+  "pricingMethod": {
+    "PRICE_BY_DESTINATION": "Price by Destination & Vehicle",
+    "PRICE_BY_HOURS": "Price by Hours",
+    "PRICE_BY_ROUTE": "Price by Route",
+    "PRICE_BY_DISTANCE": "Price by Distance",
+    "PRICE_BY_AREA": "Price by Area"
+  },
+  "fieldType": {
+    "TEXT": "Text",
+    "NUMBER": "Number",
+    "DROPDOWN": "Dropdown",
+    "BOOLEAN": "Yes/No",
+    "DATE": "Date",
+    "TIME": "Time"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "yes": "Yes",
+    "no": "No"
+  }
+}
