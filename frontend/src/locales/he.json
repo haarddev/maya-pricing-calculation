@@ -124,5 +124,18 @@
     "error": "משהו השתבש",
     "yes": "כן",
     "no": "לא"
+  },
+  "toast": {
+    "loginSuccess": "התחברת בהצלחה",
+    "logoutSuccess": "התנתקת בהצלחה",
+    "templateCreated": "התבנית נוצרה בהצלחה",
+    "templateUpdated": "התבנית עודכנה בהצלחה",
+    "templateDeleted": "התבנית נמחקה בהצלחה",
+    "templateFieldAdded": "השדה נוסף בהצלחה",
+    "templateFieldDeleted": "השדה נמחק בהצלחה",
+    "catalogCreated": "הקטלוג נוצר בהצלחה",
+    "catalogUpdated": "הקטלוג עודכן בהצלחה",
+    "catalogDeleted": "הקטלוג נמחק בהצלחה",
+    "error": "משהו השתבש. נסה שוב."
   }
 }

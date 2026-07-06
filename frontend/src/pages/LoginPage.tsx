@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -7,10 +7,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Route, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
-import { Alert } from '../components/ui/Alert';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
+import { showError, showSuccess } from '../utils/toast';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -24,7 +24,6 @@ export function LoginPage() {
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [error, setError] = useState('');
 
   const {
     register,
@@ -45,12 +44,12 @@ export function LoginPage() {
   if (isAuthenticated) return null;
 
   const onSubmit = async (data: LoginForm) => {
-    setError('');
     try {
       await login(data.email, data.password);
+      showSuccess('toast.loginSuccess');
       navigate('/templates', { replace: true });
     } catch {
-      setError(t('auth.loginError'));
+      showError('auth.loginError');
     }
   };
 
@@ -99,12 +98,6 @@ export function LoginPage() {
               <LanguageSwitcher />
             </div>
             <h2 className="mb-6 text-2xl font-bold text-slate-900 lg:hidden">{t('auth.loginTitle')}</h2>
-
-            {error && (
-              <div className="mb-4">
-                <Alert>{error}</Alert>
-              </div>
-            )}
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
               <Input

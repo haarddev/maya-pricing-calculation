@@ -5,11 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import * as catalogsApi from '../api/catalogs.api';
 import { CatalogTable } from '../components/catalogs/CatalogTable';
 import { DownloadMenu } from '../components/catalogs/DownloadMenu';
-import { Alert } from '../components/ui/Alert';
 import { Button } from '../components/ui/Button';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { Select } from '../components/ui/Select';
 import { PageLoader } from '../components/ui/Spinner';
+import { showError, showSuccess } from '../utils/toast';
 import type { Catalog, CatalogStatus } from '../types/catalog.types';
 import type { Template } from '../types/template.types';
 import { downloadCatalogs } from '../utils/catalogExport';
@@ -21,7 +21,6 @@ export function CatalogListPage() {
   const [catalogs, setCatalogs] = useState<Catalog[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<CatalogStatus | ''>('');
   const [templateFilter, setTemplateFilter] = useState('');
@@ -30,7 +29,6 @@ export function CatalogListPage() {
 
   const loadCatalogs = useCallback(async () => {
     setLoading(true);
-    setError('');
     try {
       const data = await catalogsApi.listCatalogs({
         search: search || undefined,
@@ -39,7 +37,7 @@ export function CatalogListPage() {
       });
       setCatalogs(data);
     } catch {
-      setError(t('common.error'));
+      showError();
     } finally {
       setLoading(false);
     }
@@ -61,10 +59,11 @@ export function CatalogListPage() {
     setDeleting(true);
     try {
       await catalogsApi.deleteCatalog(deleteTarget.id);
+      showSuccess('toast.catalogDeleted');
       setDeleteTarget(null);
       await loadCatalogs();
     } catch {
-      setError(t('common.error'));
+      showError();
     } finally {
       setDeleting(false);
     }
@@ -90,8 +89,6 @@ export function CatalogListPage() {
             {t('catalogs.create')}
           </Button>
         </div>      </div>
-
-      {error && <Alert>{error}</Alert>}
 
       <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-5">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

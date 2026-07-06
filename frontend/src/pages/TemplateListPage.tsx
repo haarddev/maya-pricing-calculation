@@ -9,16 +9,11 @@ import { useNavigate } from 'react-router-dom';
 import * as templatesApi from '../api/templates.api';
 
 import { TemplateTable } from '../components/templates/TemplateTable';
-
-import { Alert } from '../components/ui/Alert';
-
 import { Button } from '../components/ui/Button';
-
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
-
 import { Select } from '../components/ui/Select';
-
 import { PageLoader } from '../components/ui/Spinner';
+import { showError, showSuccess } from '../utils/toast';
 
 import type { PricingMethod, Template, TemplateStatus } from '../types/template.types';
 
@@ -52,8 +47,6 @@ export function TemplateListPage() {
 
   const [loading, setLoading] = useState(true);
 
-  const [error, setError] = useState('');
-
   const [search, setSearch] = useState('');
 
   const [statusFilter, setStatusFilter] = useState<TemplateStatus | ''>('');
@@ -69,8 +62,6 @@ export function TemplateListPage() {
   const loadTemplates = useCallback(async () => {
 
     setLoading(true);
-
-    setError('');
 
     try {
 
@@ -88,7 +79,7 @@ export function TemplateListPage() {
 
     } catch {
 
-      setError(t('common.error'));
+      showError();
 
     } finally {
 
@@ -124,13 +115,15 @@ export function TemplateListPage() {
 
       await templatesApi.deleteTemplate(deleteTarget.id);
 
+      showSuccess('toast.templateDeleted');
+
       setDeleteTarget(null);
 
       await loadTemplates();
 
     } catch {
 
-      setError(t('common.error'));
+      showError();
 
     } finally {
 
@@ -169,10 +162,6 @@ export function TemplateListPage() {
         </Button>
 
       </div>
-
-
-
-      {error && <Alert>{error}</Alert>}
 
 
 

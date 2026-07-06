@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AppLayout } from './components/Layout/AppLayout';
+import { AppToaster } from './components/ui/AppToaster';
 import { LoginPage } from './pages/LoginPage';
 import { TemplateListPage } from './pages/TemplateListPage';
 import { TemplateFormPage } from './pages/TemplateFormPage';
@@ -12,6 +13,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <AppToaster />
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route

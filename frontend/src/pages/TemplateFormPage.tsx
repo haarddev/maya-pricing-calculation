@@ -6,13 +6,13 @@ import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import * as templatesApi from '../api/templates.api';
-import { Alert } from '../components/ui/Alert';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { Textarea } from '../components/ui/Textarea';
 import { PageLoader } from '../components/ui/Spinner';
+import { showError, showSuccess } from '../utils/toast';
 import type {
   FieldType,
   PricingMethod,
@@ -64,7 +64,6 @@ export function TemplateFormPage() {
 
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
   const [fields, setFields] = useState<TemplateField[]>([]);
   const [showAddField, setShowAddField] = useState(false);
 
@@ -120,7 +119,7 @@ export function TemplateFormPage() {
         });
         setFields(template.fields ?? []);
       } catch {
-        setError(t('common.error'));
+        showError();
       } finally {
         setLoading(false);
       }
@@ -131,7 +130,6 @@ export function TemplateFormPage() {
 
   const onSubmit = async (data: TemplateForm) => {
     setSaving(true);
-    setError('');
     try {
       if (isEdit && id) {
         await templatesApi.updateTemplate(id, {
@@ -139,13 +137,15 @@ export function TemplateFormPage() {
           description: data.description,
           status: data.status,
         });
+        showSuccess('toast.templateUpdated');
         navigate('/templates');
       } else {
         const created = await templatesApi.createTemplate(data);
+        showSuccess('toast.templateCreated');
         navigate(`/templates/${created.id}`);
       }
     } catch {
-      setError(t('common.error'));
+      showError();
     } finally {
       setSaving(false);
     }
@@ -167,8 +167,9 @@ export function TemplateFormPage() {
       setFields((prev) => [...prev, field as TemplateField]);
       resetField();
       setShowAddField(false);
+      showSuccess('toast.templateFieldAdded');
     } catch {
-      setError(t('common.error'));
+      showError();
     }
   };
 
@@ -177,8 +178,9 @@ export function TemplateFormPage() {
     try {
       await templatesApi.deleteTemplateField(id, fieldId);
       setFields((prev) => prev.filter((f) => f.id !== fieldId));
+      showSuccess('toast.templateFieldDeleted');
     } catch {
-      setError(t('common.error'));
+      showError();
     }
   };
 
@@ -199,8 +201,6 @@ export function TemplateFormPage() {
           {isEdit ? t('templates.fieldsTitle') : t('templates.create')}
         </p>
       </div>
-
-      {error && <Alert>{error}</Alert>}
 
       <Card>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">

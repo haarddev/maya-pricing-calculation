@@ -9,13 +9,13 @@ import * as catalogsApi from '../api/catalogs.api';
 import * as templatesApi from '../api/templates.api';
 import { DynamicFieldForm } from '../components/catalogs/DynamicFieldForm';
 import { DownloadMenu } from '../components/catalogs/DownloadMenu';
-import { Alert } from '../components/ui/Alert';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { Textarea } from '../components/ui/Textarea';
 import { PageLoader } from '../components/ui/Spinner';
+import { showError, showSuccess } from '../utils/toast';
 import type { Catalog, FieldValues } from '../types/catalog.types';
 import type { PricingMethod, Template, TemplateField } from '../types/template.types';
 import { calculateCatalogPrice, formatPrice } from '../utils/catalogPricing';
@@ -41,7 +41,6 @@ export function CatalogFormPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [fieldValues, setFieldValues] = useState<FieldValues>({});
@@ -88,7 +87,7 @@ export function CatalogFormPage() {
           }
         }
       } catch {
-        setError(t('common.error'));
+        showError();
       } finally {
         setLoading(false);
       }
@@ -107,7 +106,7 @@ export function CatalogFormPage() {
         setFieldValues({});
         setFieldErrors({});
       } catch {
-        setError(t('common.error'));
+        showError();
       }
     }
 
@@ -151,7 +150,7 @@ export function CatalogFormPage() {
 
   const onSubmit = async (data: MetaForm) => {
     if (!selectedTemplate) {
-      setError(t('catalogs.selectTemplateFirst'));
+      showError('catalogs.selectTemplateFirst');
       return;
     }
 
@@ -160,7 +159,6 @@ export function CatalogFormPage() {
     }
 
     setSaving(true);
-    setError('');
     try {
       if (isEdit && id) {
         await catalogsApi.updateCatalog(id, {
@@ -169,6 +167,7 @@ export function CatalogFormPage() {
           status: data.status,
           fieldValues,
         });
+        showSuccess('toast.catalogUpdated');
       } else {
         await catalogsApi.createCatalog({
           name: data.name,
@@ -177,10 +176,11 @@ export function CatalogFormPage() {
           templateId: data.templateId,
           fieldValues,
         });
+        showSuccess('toast.catalogCreated');
       }
       navigate('/catalogs');
     } catch {
-      setError(t('common.error'));
+      showError();
     } finally {
       setSaving(false);
     }
@@ -224,8 +224,6 @@ export function CatalogFormPage() {
         </h1>
         <p className="mt-1 text-sm text-slate-500">{t('catalogs.formSubtitle')}</p>
       </div>
-
-      {error && <Alert>{error}</Alert>}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card>

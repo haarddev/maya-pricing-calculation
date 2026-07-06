@@ -124,5 +124,18 @@
     "error": "Something went wrong",
     "yes": "Yes",
     "no": "No"
+  },
+  "toast": {
+    "loginSuccess": "Signed in successfully",
+    "logoutSuccess": "Signed out successfully",
+    "templateCreated": "Template created successfully",
+    "templateUpdated": "Template updated successfully",
+    "templateDeleted": "Template deleted successfully",
+    "templateFieldAdded": "Field added successfully",
+    "templateFieldDeleted": "Field deleted successfully",
+    "catalogCreated": "Catalog created successfully",
+    "catalogUpdated": "Catalog updated successfully",
+    "catalogDeleted": "Catalog deleted successfully",
+    "error": "Something went wrong. Please try again."
   }
 }

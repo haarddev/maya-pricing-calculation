@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { LanguageSwitcher } from '../LanguageSwitcher';
 import { Button } from '../ui/Button';
+import { showSuccess } from '../../utils/toast';
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
   `rounded-lg px-3 py-2 text-sm font-semibold transition ${
@@ -39,7 +40,14 @@ export function AppLayout() {
 
             <div className="flex items-center gap-2 sm:gap-3">
               <LanguageSwitcher />
-              <Button variant="ghost" onClick={logout} className="!px-3 sm:!px-4">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  logout();
+                  showSuccess('toast.logoutSuccess');
+                }}
+                className="!px-3 sm:!px-4"
+              >
                 <LogOut className="h-4 w-4" />
                 <span className="hidden sm:inline">{t('app.logout')}</span>
               </Button>
