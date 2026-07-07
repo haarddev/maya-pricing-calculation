@@ -82,10 +82,12 @@ console.log('\n[dev] Preparing Prisma...\n');
 if (runNpm(['exec', 'prisma', 'generate'], backendDir) !== 0) {
   process.exit(1);
 }
-if (runNpm(['exec', 'prisma', 'migrate', 'deploy'], backendDir) !== 0) {
-  console.warn(
-    '[dev] Prisma migrate failed. Start PostgreSQL, then run: npm run prisma:migrate\n',
-  );
+if (runNpm(['run', 'prisma:push'], backendDir) !== 0) {
+  if (runNpm(['run', 'prisma:migrate'], backendDir) !== 0) {
+    console.warn(
+      '[dev] Prisma schema sync failed. Start PostgreSQL, then run: npm run prisma:push --prefix backend\n',
+    );
+  }
 }
 
 console.log('\n[dev] Starting backend, frontend, and Prisma Studio...\n');

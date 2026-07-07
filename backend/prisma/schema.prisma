@@ -37,6 +37,14 @@ enum CatalogStatus {
   DRAFT
 }
 
+enum LogCategory {
+  INCOMING_REQUEST
+  OUTGOING_RESPONSE
+  PRICING_RESULT
+  EXTERNAL_CALLBACK
+  ERROR
+}
+
 model User {
   id           String     @id @default(uuid())
   email        String     @unique
@@ -97,4 +105,26 @@ model Catalog {
   updatedAt       DateTime      @updatedAt @map("updated_at")
 
   @@map("catalogs")
+}
+
+model SystemLog {
+  id              String       @id @default(uuid())
+  category        LogCategory
+  method          String?
+  path            String?
+  statusCode      Int?         @map("status_code")
+  source          String?
+  externalId      String?      @map("external_id")
+  pricingMethod   String?      @map("pricing_method")
+  requestBody     Json?        @map("request_body")
+  responseBody    Json?        @map("response_body")
+  calculatedPrice Decimal?     @map("calculated_price") @db.Decimal(12, 2)
+  durationMs      Int?         @map("duration_ms")
+  errorMessage    String?      @map("error_message")
+  isDummy         Boolean      @default(false) @map("is_dummy")
+  userId          String?      @map("user_id")
+  createdAt       DateTime     @default(now()) @map("created_at")
+
+  @@index([category, createdAt])
+  @@map("system_logs")
 }

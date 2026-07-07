@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { BookOpen, LogOut, Route } from 'lucide-react';
+import { BookOpen, LogOut, Route, Activity } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { LanguageSwitcher } from '../LanguageSwitcher';
@@ -62,6 +62,12 @@ export function AppLayout() {
               <span className="inline-flex items-center gap-1.5">
                 <BookOpen className="h-4 w-4" />
                 {t('nav.catalogs')}
+              </span>
+            </NavLink>
+            <NavLink to="/monitoring" className={navClass}>
+              <span className="inline-flex items-center gap-1.5">
+                <Activity className="h-4 w-4" />
+                {t('nav.monitoring')}
               </span>
             </NavLink>
           </nav>

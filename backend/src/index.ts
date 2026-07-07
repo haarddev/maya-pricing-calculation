@@ -3,9 +3,13 @@ import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 import { env } from './config/env.js';
+import { requestLogger } from './middleware/requestLogger.js';
+import type { AuthRequest } from './middleware/auth.js';
 import { authRouter } from './routes/auth.routes.js';
 import { catalogRouter } from './routes/catalog.routes.js';
+import { logRouter } from './routes/log.routes.js';
 import { templateRouter } from './routes/template.routes.js';
+import * as logService from './services/log.service.js';
 import { AppError, sendError } from './utils/errors.js';
 
 const app = express();
@@ -13,6 +17,7 @@ const app = express();
 app.use(helmet());
 app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(express.json());
+app.use(requestLogger);
 
 app.get('/health', (_req, res) => {
   res.json({ success: true, data: { status: 'ok' } });
@@ -21,13 +26,31 @@ app.get('/health', (_req, res) => {
 app.use('/api/auth', authRouter);
 app.use('/api/templates', templateRouter);
 app.use('/api/catalogs', catalogRouter);
+app.use('/api/logs', logRouter);
 
 app.use((_req, _res, next) => {
   next(new AppError(404, 'Route not found'));
 });
 
-app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+app.use((err: unknown, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  const authReq = req as AuthRequest;
+  const statusCode = err instanceof AppError ? err.statusCode : 500;
+  const message = err instanceof AppError ? err.message : 'Internal server error';
+
+  void logService.logError({
+    method: req.method,
+    path: req.originalUrl,
+    statusCode,
+    errorMessage: message,
+    userId: authReq.user?.id,
+    requestBody: req.method !== 'GET' && req.method !== 'DELETE' ? req.body : undefined,
+  });
+
   sendError(res, err);
+});
+
+void logService.seedDummyLogsIfNeeded().catch((error) => {
+  console.error('Failed to seed dummy logs:', error);
 });
 
 app.listen(env.PORT, () => {

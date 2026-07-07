@@ -1,6 +1,7 @@
 import { CatalogStatus, Prisma, TemplateStatus } from '@prisma/client';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
+import { logPricingResult } from './log.service.js';
 import { AppError } from '../utils/errors.js';
 import {
   calculateCatalogPrice,
@@ -96,7 +97,17 @@ export async function createCatalog(input: unknown, userId: string) {
   const fieldValues = normalizeFieldValues(template.fields, data.fieldValues);
   validateFieldValues(template.fields, fieldValues);
 
+  const calcStart = Date.now();
   const calculatedPrice = calculateCatalogPrice(template.pricingMethod, fieldValues);
+  const durationMs = Date.now() - calcStart;
+
+  void logPricingResult({
+    pricingMethod: template.pricingMethod,
+    fieldValues,
+    calculatedPrice,
+    durationMs,
+    userId,
+  });
 
   return prisma.catalog.create({
     data: {
@@ -124,7 +135,17 @@ export async function updateCatalog(id: string, input: unknown) {
   if (data.fieldValues) {
     fieldValues = normalizeFieldValues(existing.template.fields, data.fieldValues);
     validateFieldValues(existing.template.fields, fieldValues);
+    const calcStart = Date.now();
     calculatedPrice = calculateCatalogPrice(existing.template.pricingMethod, fieldValues);
+    const durationMs = Date.now() - calcStart;
+
+    void logPricingResult({
+      pricingMethod: existing.template.pricingMethod,
+      fieldValues,
+      calculatedPrice,
+      durationMs,
+      source: 'catalog-update',
+    });
   }
 
   return prisma.catalog.update({
@@ -150,8 +171,20 @@ export async function previewCatalogPrice(templateId: string, fieldValues: Recor
   const normalized = normalizeFieldValues(template.fields, fieldValues);
   validateFieldValues(template.fields, normalized);
 
+  const calcStart = Date.now();
+  const calculatedPrice = calculateCatalogPrice(template.pricingMethod, normalized);
+  const durationMs = Date.now() - calcStart;
+
+  void logPricingResult({
+    pricingMethod: template.pricingMethod,
+    fieldValues: normalized,
+    calculatedPrice,
+    durationMs,
+    source: 'catalog-preview',
+  });
+
   return {
-    calculatedPrice: calculateCatalogPrice(template.pricingMethod, normalized),
+    calculatedPrice,
     fieldValues: normalized,
   };
 }

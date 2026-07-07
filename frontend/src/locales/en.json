@@ -5,7 +5,8 @@
   },
   "nav": {
     "templates": "Templates",
-    "catalogs": "Catalogs"
+    "catalogs": "Catalogs",
+    "monitoring": "Logs & Monitoring"
   },
   "auth": {
     "loginTitle": "Sign in to Maya Pricing",
@@ -137,5 +138,47 @@
     "catalogUpdated": "Catalog updated successfully",
     "catalogDeleted": "Catalog deleted successfully",
     "error": "Something went wrong. Please try again."
+  },
+  "logs": {
+    "title": "Logs & Monitoring",
+    "subtitle": "Track API requests, pricing calculations, external callbacks, and system errors",
+    "badge": "System Monitoring",
+    "refresh": "Refresh",
+    "search": "Search logs",
+    "searchPlaceholder": "Search by path, source, external ID, or error...",
+    "filterCategory": "Filter by category",
+    "allCategories": "All categories",
+    "noResults": "No logs found",
+    "sampleData": "Sample data",
+    "categories": {
+      "INCOMING_REQUEST": "Incoming API Requests",
+      "OUTGOING_RESPONSE": "Outgoing API Responses",
+      "PRICING_RESULT": "Pricing Results",
+      "EXTERNAL_CALLBACK": "External API Callbacks",
+      "ERROR": "Errors"
+    },
+    "columns": {
+      "path": "Path / Endpoint",
+      "source": "Source",
+      "duration": "Duration",
+      "price": "Calculated Price",
+      "pricingMethod": "Pricing method",
+      "externalId": "External ID",
+      "error": "Error",
+      "requestBody": "Request body",
+      "responseBody": "Response body"
+    },
+    "stats": {
+      "requests24h": "Requests (24h)",
+      "requests24hHint": "All logged events in the last 24 hours",
+      "avgCalcTime": "Avg. calc time",
+      "avgCalcTimeHint": "Average pricing calculation duration",
+      "pricingCalcs": "Pricing calculations",
+      "pricingCalcsHint": "Total pricing results logged",
+      "errorCount": "Errors",
+      "errorCountHint": "Total error events recorded",
+      "successRate": "Success rate",
+      "successRateHint": "Based on incoming requests vs errors"
+    }
   }
 }

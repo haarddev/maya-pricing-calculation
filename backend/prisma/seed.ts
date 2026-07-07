@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { PrismaClient, TemplateStatus } from '@prisma/client';
+import { seedDummyLogsIfNeeded } from '../src/services/log.service.js';
 
 const prisma = new PrismaClient();
 
@@ -108,6 +109,8 @@ async function main() {
   }
 
   console.log('Seed completed');
+
+  await seedDummyLogsIfNeeded();
 }
 
 main()

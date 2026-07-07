@@ -3,9 +3,14 @@
   "private": true,
   "scripts": {
     "dev": "node scripts/start-dev.mjs",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "start:backend": "npm --prefix backend run start",
     "db:up": "docker compose up -d",
-    "prisma:generate": "npm --prefix backend exec prisma generate",
-    "prisma:migrate": "npm --prefix backend exec prisma migrate deploy",
+    "prisma:generate": "npm --prefix backend run prisma:generate",
+    "prisma:push": "npm --prefix backend run prisma:push",
+    "prisma:migrate": "npm --prefix backend run prisma:migrate",
     "prisma:studio": "npm --prefix backend run prisma:studio",
     "backend:dev": "npm --prefix backend run dev",
     "frontend:dev": "npm --prefix frontend run dev"

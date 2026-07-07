@@ -8,6 +8,7 @@ import { TemplateListPage } from './pages/TemplateListPage';
 import { TemplateFormPage } from './pages/TemplateFormPage';
 import { CatalogListPage } from './pages/CatalogListPage';
 import { CatalogFormPage } from './pages/CatalogFormPage';
+import { MonitoringPage } from './pages/MonitoringPage';
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
             <Route path="/catalogs" element={<CatalogListPage />} />
             <Route path="/catalogs/new" element={<CatalogFormPage />} />
             <Route path="/catalogs/:id" element={<CatalogFormPage />} />
+            <Route path="/monitoring" element={<MonitoringPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/templates" replace />} />
         </Routes>

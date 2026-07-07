@@ -5,7 +5,8 @@
   },
   "nav": {
     "templates": "תבניות",
-    "catalogs": "קטלוגים"
+    "catalogs": "קטלוגים",
+    "monitoring": "לוגים וניטור"
   },
   "auth": {
     "loginTitle": "התחברות למערכת Maya Pricing",
@@ -137,5 +138,47 @@
     "catalogUpdated": "הקטלוג עודכן בהצלחה",
     "catalogDeleted": "הקטלוג נמחק בהצלחה",
     "error": "משהו השתבש. נסה שוב."
+  },
+  "logs": {
+    "title": "לוגים וניטור",
+    "subtitle": "מעקב אחר בקשות API, חישובי תמחור, קריאות חוזרות למערכות חיצוניות ושגיאות",
+    "badge": "ניטור מערכת",
+    "refresh": "רענון",
+    "search": "חיפוש בלוגים",
+    "searchPlaceholder": "חיפוש לפי נתיב, מקור, מזהה חיצוני או שגיאה...",
+    "filterCategory": "סינון לפי קטגוריה",
+    "allCategories": "כל הקטגוריות",
+    "noResults": "לא נמצאו לוגים",
+    "sampleData": "נתוני דוגמה",
+    "categories": {
+      "INCOMING_REQUEST": "בקשות API נכנסות",
+      "OUTGOING_RESPONSE": "תגובות API יוצאות",
+      "PRICING_RESULT": "תוצאות תמחור",
+      "EXTERNAL_CALLBACK": "קריאות חוזרות למערכות חיצוניות",
+      "ERROR": "שגיאות"
+    },
+    "columns": {
+      "path": "נתיב / נקודת קצה",
+      "source": "מקור",
+      "duration": "משך זמן",
+      "price": "מחיר מחושב",
+      "pricingMethod": "שיטת תמחור",
+      "externalId": "מזהה חיצוני",
+      "error": "שגיאה",
+      "requestBody": "גוף בקשה",
+      "responseBody": "גוף תגובה"
+    },
+    "stats": {
+      "requests24h": "בקשות (24 שעות)",
+      "requests24hHint": "כל האירועים שנרשמו ב-24 השעות האחרונות",
+      "avgCalcTime": "זמן חישוב ממוצע",
+      "avgCalcTimeHint": "משך חישוב תמחור ממוצע",
+      "pricingCalcs": "חישובי תמחור",
+      "pricingCalcsHint": "סה״כ תוצאות תמחור שנרשמו",
+      "errorCount": "שגיאות",
+      "errorCountHint": "סה״כ אירועי שגיאה שנרשמו",
+      "successRate": "אחוז הצלחה",
+      "successRateHint": "מבוסס על בקשות נכנסות מול שגיאות"
+    }
   }
 }
