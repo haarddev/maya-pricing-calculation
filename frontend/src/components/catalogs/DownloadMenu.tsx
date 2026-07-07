@@ -47,7 +47,7 @@ export function DownloadMenu({
         type="button"
         disabled={disabled}
         onClick={() => setOpen((value) => !value)}
-        className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${variantClass[variant]}`}
+        className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${variantClass[variant]}`}
       >
         <Download className="h-4 w-4" />
         {label}
@@ -69,7 +69,7 @@ function MenuItem({ children, onClick }: { children: ReactNode; onClick: () => v
     <button
       type="button"
       onClick={onClick}
-      className="block w-full px-4 py-2.5 text-start text-sm text-slate-700 transition hover:bg-slate-50"
+      className="block w-full cursor-pointer px-4 py-2.5 text-start text-sm text-slate-700 transition hover:bg-slate-50"
     >
       {children}
     </button>

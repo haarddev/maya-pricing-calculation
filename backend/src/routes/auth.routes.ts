@@ -30,3 +30,21 @@ authRouter.get('/me', authMiddleware, async (req: AuthRequest, res) => {
     sendError(res, error);
   }
 });
+
+authRouter.put('/profile', authMiddleware, async (req: AuthRequest, res) => {
+  try {
+    const user = await authService.updateProfile(req.user!.id, req.body);
+    res.json({ success: true, data: user });
+  } catch (error) {
+    sendError(res, error);
+  }
+});
+
+authRouter.put('/password', authMiddleware, async (req: AuthRequest, res) => {
+  try {
+    await authService.changePassword(req.user!.id, req.body);
+    res.json({ success: true, data: null });
+  } catch (error) {
+    sendError(res, error);
+  }
+});

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Route, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useAppSettings } from '../context/SettingsContext';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -22,6 +23,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 export function LoginPage() {
   const { t } = useTranslation();
   const { login, isAuthenticated } = useAuth();
+  const { appName } = useAppSettings();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -65,7 +67,7 @@ export function LoginPage() {
             <Route className="h-7 w-7" />
           </div>
           <h1 className="max-w-md text-4xl font-bold leading-tight text-white">
-            {t('app.title')}
+            {appName}
           </h1>
           <p className="mt-4 max-w-sm text-lg text-indigo-100">
             {t('templates.title')}
@@ -87,7 +89,7 @@ export function LoginPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600 text-white">
                 <Route className="h-5 w-5" />
               </div>
-              <h1 className="text-lg font-bold text-slate-900">{t('app.title')}</h1>
+              <h1 className="text-lg font-bold text-slate-900">{appName}</h1>
             </div>
             <LanguageSwitcher />
           </div>

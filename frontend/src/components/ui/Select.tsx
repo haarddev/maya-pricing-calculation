@@ -4,20 +4,23 @@ type SelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
   label: string;
   error?: string;
   options: { value: string; label: string }[];
+  hideLabel?: boolean;
 };
 
-export function Select({ label, error, options, className = '', id, ...props }: SelectProps) {
+export function Select({ label, error, options, hideLabel, className = '', id, ...props }: SelectProps) {
   const selectId = id ?? props.name;
 
   return (
     <div className="w-full">
-      <label htmlFor={selectId} className="mb-1.5 block text-sm font-medium text-slate-700">
-        {label}
-      </label>
+      {!hideLabel && (
+        <label htmlFor={selectId} className="mb-1.5 block text-sm font-medium text-slate-700">
+          {label}
+        </label>
+      )}
       <select
         id={selectId}
         {...props}
-        className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 ${error ? 'border-red-300' : 'border-slate-200'} ${className}`}
+        className={`w-full cursor-pointer rounded-xl border bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed ${error ? 'border-red-300' : 'border-slate-200'} ${className}`}
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>

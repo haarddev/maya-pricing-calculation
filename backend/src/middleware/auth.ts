@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { UserRole } from '@prisma/client';
 import { env } from '../config/env.js';
 import { getUserById, type AuthUser } from '../services/auth.service.js';
 import { AppError } from '../utils/errors.js';
@@ -10,6 +11,7 @@ type JwtPayload = {
   sub: string;
   email: string;
   name: string;
+  role?: UserRole;
 };
 
 export async function authMiddleware(req: AuthRequest, _res: Response, next: NextFunction) {

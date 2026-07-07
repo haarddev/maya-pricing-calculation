@@ -1,21 +1,29 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Calculator } from 'lucide-react';
+import { Calculator } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import * as catalogsApi from '../api/catalogs.api';
-import * as templatesApi from '../api/templates.api';
 import { DynamicFieldForm } from '../components/catalogs/DynamicFieldForm';
 import { DownloadMenu } from '../components/catalogs/DownloadMenu';
-import { Button } from '../components/ui/Button';
+import { FormPageShell } from '../components/Layout/FormPageShell';
+import { BackButton } from '../components/ui/BackButton';
 import { Card } from '../components/ui/Card';
+import { FormActionFooter } from '../components/ui/FormActionFooter';
+import { SectionCard } from '../components/ui/SectionCard';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { Textarea } from '../components/ui/Textarea';
 import { PageLoader } from '../components/ui/Spinner';
-import { showError, showSuccess } from '../utils/toast';
+import {
+  useCatalog,
+  useCatalogTemplates,
+  useCreateCatalog,
+  useTemplateForCatalog,
+  useUpdateCatalog,
+} from '../hooks/queries/catalogs';
+import { showError } from '../utils/toast';
 import type { Catalog, FieldValues } from '../types/catalog.types';
 import type { PricingMethod, Template, TemplateField } from '../types/template.types';
 import { calculateCatalogPrice, formatPrice } from '../utils/catalogPricing';
@@ -39,13 +47,14 @@ export function CatalogFormPage() {
   const isEdit = Boolean(id);
   const isHebrew = i18n.language.startsWith('he');
 
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [fieldValues, setFieldValues] = useState<FieldValues>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [savedCatalog, setSavedCatalog] = useState<Catalog | null>(null);
+
+  const { data: templates = [], isLoading: templatesLoading } = useCatalogTemplates();
+  const { data: catalog, isLoading: catalogLoading } = useCatalog(id);
+  const createCatalog = useCreateCatalog();
+  const updateCatalog = useUpdateCatalog(id ?? '');
 
   const {
     register,
@@ -65,53 +74,35 @@ export function CatalogFormPage() {
   });
 
   const templateId = watch('templateId');
+  const effectiveTemplateId = isEdit ? catalog?.templateId : templateId;
+
+  const { data: templateDetail, isLoading: templateLoading } = useTemplateForCatalog(
+    effectiveTemplateId,
+    Boolean(effectiveTemplateId),
+  );
+
+  const selectedTemplate = useMemo(() => {
+    if (isEdit && catalog?.template) return catalog.template as Template;
+    return templateDetail ?? null;
+  }, [catalog?.template, isEdit, templateDetail]);
 
   useEffect(() => {
-    async function init() {
-      try {
-        const activeTemplates = await catalogsApi.listActiveTemplates();
-        setTemplates(activeTemplates);
-
-        if (isEdit && id) {
-          const catalog = await catalogsApi.getCatalog(id);
-          reset({
-            name: catalog.name,
-            description: catalog.description,
-            status: catalog.status,
-            templateId: catalog.templateId,
-          });
-          setFieldValues(catalog.fieldValues);
-          setSavedCatalog(catalog);
-          if (catalog.template) {
-            setSelectedTemplate(catalog.template as Template);
-          }
-        }
-      } catch {
-        showError();
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    void init();
-  }, [id, isEdit, reset, t]);
+    if (!catalog) return;
+    reset({
+      name: catalog.name,
+      description: catalog.description,
+      status: catalog.status,
+      templateId: catalog.templateId,
+    });
+    setFieldValues(catalog.fieldValues);
+    setSavedCatalog(catalog);
+  }, [catalog, reset]);
 
   useEffect(() => {
-    if (!templateId || isEdit) return;
-
-    async function loadTemplate() {
-      try {
-        const template = await templatesApi.getTemplate(templateId);
-        setSelectedTemplate(template);
-        setFieldValues({});
-        setFieldErrors({});
-      } catch {
-        showError();
-      }
-    }
-
-    void loadTemplate();
-  }, [templateId, isEdit, t]);
+    if (isEdit) return;
+    setFieldValues({});
+    setFieldErrors({});
+  }, [templateId, isEdit]);
 
   const previewPrice = useMemo(() => {
     if (!selectedTemplate) return null;
@@ -148,7 +139,7 @@ export function CatalogFormPage() {
     return Object.keys(nextErrors).length === 0;
   };
 
-  const onSubmit = async (data: MetaForm) => {
+  const onSubmit = (data: MetaForm) => {
     if (!selectedTemplate) {
       showError('catalogs.selectTemplateFirst');
       return;
@@ -158,33 +149,35 @@ export function CatalogFormPage() {
       return;
     }
 
-    setSaving(true);
-    try {
-      if (isEdit && id) {
-        await catalogsApi.updateCatalog(id, {
+    if (isEdit && id) {
+      updateCatalog.mutate(
+        {
           name: data.name,
           description: data.description,
           status: data.status,
           fieldValues,
-        });
-        showSuccess('toast.catalogUpdated');
-      } else {
-        await catalogsApi.createCatalog({
-          name: data.name,
-          description: data.description,
-          status: data.status,
-          templateId: data.templateId,
-          fieldValues,
-        });
-        showSuccess('toast.catalogCreated');
-      }
-      navigate('/catalogs');
-    } catch {
-      showError();
-    } finally {
-      setSaving(false);
+        },
+        { onSuccess: () => navigate('/catalogs') },
+      );
+      return;
     }
+
+    createCatalog.mutate(
+      {
+        name: data.name,
+        description: data.description,
+        status: data.status,
+        templateId: data.templateId,
+        fieldValues,
+      },
+      { onSuccess: () => navigate('/catalogs') },
+    );
   };
+
+  const loading =
+    templatesLoading ||
+    (isEdit && catalogLoading) ||
+    (Boolean(effectiveTemplateId) && templateLoading && !selectedTemplate);
 
   if (loading) return <PageLoader />;
 
@@ -202,32 +195,23 @@ export function CatalogFormPage() {
       : null;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <Button variant="ghost" onClick={() => navigate('/catalogs')} className="!px-0 self-start">
-          <ArrowLeft className="h-4 w-4" />
-          {t('catalogs.cancel')}
-        </Button>
-        {isEdit && catalogForDownload && (
+    <FormPageShell
+      back={<BackButton to="/catalogs" label={t('catalogs.cancel')} />}
+      topActions={
+        isEdit && catalogForDownload ? (
           <DownloadMenu
             label={t('catalogs.download')}
             csvLabel={t('catalogs.downloadCsv')}
             jsonLabel={t('catalogs.downloadJson')}
             onDownload={(format) => downloadCatalog(catalogForDownload, format, t)}
           />
-        )}
-      </div>
-
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-          {isEdit ? t('catalogs.edit') : t('catalogs.new')}
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">{t('catalogs.formSubtitle')}</p>
-      </div>
-
+        ) : undefined
+      }
+      title={isEdit ? t('catalogs.edit') : t('catalogs.new')}
+      subtitle={t('catalogs.formSubtitle')}
+    >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <Card>
-          <h2 className="mb-4 text-lg font-semibold text-slate-900">{t('catalogs.basicInfo')}</h2>
+        <SectionCard title={t('catalogs.basicInfo')}>
           <div className="space-y-4">
             <Input {...register('name')} label={t('catalogs.name')} error={errors.name?.message} />
             <Textarea {...register('description')} label={t('catalogs.description')} rows={3} />
@@ -279,19 +263,18 @@ export function CatalogFormPage() {
               />
             )}
           </div>
-        </Card>
+        </SectionCard>
 
         {selectedTemplate && (
           <>
-            <Card>
-              <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-900">{t('catalogs.fieldValues')}</h2>
-                  <p className="text-sm text-slate-500">
-                    {t(`pricingMethod.${selectedTemplate.pricingMethod as PricingMethod}`)}
-                  </p>
-                </div>
-              </div>
+            <SectionCard
+              title={t('catalogs.fieldValues')}
+              actions={
+                <p className="text-sm text-slate-500">
+                  {t(`pricingMethod.${selectedTemplate.pricingMethod as PricingMethod}`)}
+                </p>
+              }
+            >
               <DynamicFieldForm
                 fields={selectedTemplate.fields ?? []}
                 values={fieldValues}
@@ -299,7 +282,7 @@ export function CatalogFormPage() {
                 onChange={handleFieldChange}
                 errors={fieldErrors}
               />
-            </Card>
+            </SectionCard>
 
             <Card className="border-brand-200 bg-gradient-to-br from-brand-50 to-indigo-50">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -322,15 +305,13 @@ export function CatalogFormPage() {
           </>
         )}
 
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <Button type="submit" loading={saving} className="sm:flex-1">
-            {t('catalogs.save')}
-          </Button>
-          <Button type="button" variant="secondary" onClick={() => navigate('/catalogs')} className="sm:flex-1">
-            {t('catalogs.cancel')}
-          </Button>
-        </div>
+        <FormActionFooter
+          saveLabel={t('catalogs.save')}
+          cancelLabel={t('catalogs.cancel')}
+          onCancel={() => navigate('/catalogs')}
+          loading={createCatalog.isPending || updateCatalog.isPending}
+        />
       </form>
-    </div>
+    </FormPageShell>
   );
 }

@@ -8,6 +8,15 @@ export const catalogRouter = Router();
 
 catalogRouter.use(authMiddleware);
 
+catalogRouter.get('/templates', async (_req, res) => {
+  try {
+    const templates = await catalogService.listTemplatesForCatalog();
+    res.json({ success: true, data: templates });
+  } catch (error) {
+    sendError(res, error);
+  }
+});
+
 catalogRouter.get('/', async (req, res) => {
   try {
     const status = req.query.status as CatalogStatus | undefined;

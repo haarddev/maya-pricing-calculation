@@ -6,7 +6,8 @@
   "nav": {
     "templates": "Templates",
     "catalogs": "Catalogs",
-    "monitoring": "Logs & Monitoring"
+    "monitoring": "Logs & Monitoring",
+    "settings": "Settings"
   },
   "auth": {
     "loginTitle": "Sign in to Maya Pricing",
@@ -124,7 +125,8 @@
     "loading": "Loading...",
     "error": "Something went wrong",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "close": "Close"
   },
   "toast": {
     "loginSuccess": "Signed in successfully",
@@ -149,6 +151,7 @@
     "filterCategory": "Filter by category",
     "allCategories": "All categories",
     "noResults": "No logs found",
+    "detailsTitle": "Log details",
     "sampleData": "Sample data",
     "categories": {
       "INCOMING_REQUEST": "Incoming API Requests",
@@ -158,6 +161,10 @@
       "ERROR": "Errors"
     },
     "columns": {
+      "category": "Category",
+      "status": "Status",
+      "method": "Method",
+      "time": "Time",
       "path": "Path / Endpoint",
       "source": "Source",
       "duration": "Duration",
@@ -179,6 +186,113 @@
       "errorCountHint": "Total error events recorded",
       "successRate": "Success rate",
       "successRateHint": "Based on incoming requests vs errors"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage application preferences, security, and users",
+    "badge": "Configuration",
+    "save": "Save changes",
+    "tabs": {
+      "profile": "Profile",
+      "general": "General",
+      "security": "Security",
+      "users": "Users",
+      "sessions": "Sessions"
+    },
+    "general": {
+      "title": "Application",
+      "appName": "App name",
+      "appNameHint": "Displayed in the header and login page"
+    },
+    "profile": {
+      "title": "Profile",
+      "name": "Full name",
+      "email": "Email address"
+    },
+    "password": {
+      "title": "Change password",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Confirm new password",
+      "change": "Update password"
+    },
+    "security": {
+      "title": "Security & catalog rules",
+      "subtitle": "Configure authentication, login protection, and catalog access policies",
+      "sections": {
+        "auth": "Authentication",
+        "loginProtection": "Login protection",
+        "catalogRules": "Catalog rules"
+      },
+      "jwtExpiresIn": "JWT session expiry",
+      "jwtHint": "How long users stay signed in before re-authenticating",
+      "loginAttemptLimit": "Login attempt limit",
+      "loginAttemptHint": "Failed attempts allowed before the account is locked",
+      "lockoutDuration": "Lockout duration (minutes)",
+      "lockoutHint": "How long a locked account remains blocked",
+      "allowOnlyActiveTemplates": "Allow only ACTIVE templates for catalogs",
+      "allowOnlyActiveTemplatesHint": "When enabled, only active templates can be selected when creating catalogs"
+    },
+    "users": {
+      "addTitle": "Add user",
+      "addHint": "New team member",
+      "listTitle": "Manage users",
+      "subtitle": "Create accounts, assign roles, and control access",
+      "empty": "No users found",
+      "you": "You",
+      "add": "Create user",
+      "password": "Temporary password",
+      "role": "Role",
+      "disable": "Disable",
+      "enable": "Enable",
+      "locked": "Locked",
+      "edit": "Edit",
+      "delete": "Delete",
+      "editTitle": "Edit user",
+      "editSelfHint": "You are editing your own account. You cannot disable yourself.",
+      "newPassword": "New password",
+      "passwordOptional": "Leave blank to keep current",
+      "passwordOptionalHint": "Only fill in if you want to reset this user's password.",
+      "unlockHint": "Set status to Active to unlock the account.",
+      "statusSelfHint": "You cannot disable your own account.",
+      "deleteTitle": "Delete user",
+      "deleteConfirm": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+      "stats": {
+        "total": "Total users",
+        "active": "Active",
+        "admins": "Admins",
+        "locked": "Locked"
+      },
+      "columns": {
+        "user": "User",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "statuses": {
+        "ACTIVE": "Active",
+        "DISABLED": "Disabled"
+      },
+      "roles": {
+        "ADMIN": "Admin",
+        "USER": "User"
+      }
+    },
+    "sessions": {
+      "title": "Sessions",
+      "future": "Logout from all devices will be available in a future update."
+    },
+    "toast": {
+      "generalSaved": "Application settings saved",
+      "securitySaved": "Security settings saved",
+      "profileSaved": "Profile updated successfully",
+      "passwordSaved": "Password changed successfully",
+      "userCreated": "User created successfully",
+      "userUpdated": "User updated successfully",
+      "userDeleted": "User deleted successfully"
+    },
+    "errors": {
+      "currentPassword": "Current password is incorrect"
     }
   }
 }

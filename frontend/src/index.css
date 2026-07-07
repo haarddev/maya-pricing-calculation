@@ -26,6 +26,34 @@
   [dir="ltr"] body {
     font-family: "Rubik", "Roboto", ui-sans-serif, system-ui, sans-serif;
   }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  a[href],
+  select:not(:disabled),
+  summary,
+  label,
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled) {
+    @apply cursor-pointer;
+  }
+
+  button:disabled,
+  select:disabled,
+  input:disabled {
+    @apply cursor-not-allowed;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  textarea {
+    @apply cursor-text;
+  }
 }
 
 @layer utilities {

@@ -1,7 +1,8 @@
-import { CatalogStatus, Prisma, TemplateStatus } from '@prisma/client';
+import { TemplateStatus, Prisma, CatalogStatus } from '@prisma/client';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
 import { logPricingResult } from './log.service.js';
+import { shouldRequireActiveTemplate } from './settings.service.js';
 import { AppError } from '../utils/errors.js';
 import {
   calculateCatalogPrice,
@@ -48,7 +49,8 @@ async function getTemplateForCatalog(templateId: string) {
     throw new AppError(404, 'Template not found');
   }
 
-  if (template.status !== TemplateStatus.ACTIVE) {
+  const requireActive = await shouldRequireActiveTemplate();
+  if (requireActive && template.status !== TemplateStatus.ACTIVE) {
     throw new AppError(400, 'Only active templates can be used for catalogs');
   }
 
@@ -164,6 +166,22 @@ export async function updateCatalog(id: string, input: unknown) {
 export async function deleteCatalog(id: string) {
   await getCatalogById(id);
   await prisma.catalog.delete({ where: { id } });
+}
+
+export async function listTemplatesForCatalog() {
+  const requireActive = await shouldRequireActiveTemplate();
+
+  return prisma.template.findMany({
+    where: requireActive ? { status: TemplateStatus.ACTIVE } : undefined,
+    orderBy: { name: 'asc' },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      status: true,
+      pricingMethod: true,
+    },
+  });
 }
 
 export async function previewCatalogPrice(templateId: string, fieldValues: Record<string, unknown>) {

@@ -48,8 +48,6 @@ export async function previewCatalog(templateId: string, fieldValues: Record<str
 }
 
 export async function listActiveTemplates() {
-  const { data } = await apiClient.get<ApiResponse<Template[]>>('/api/templates', {
-    params: { status: 'ACTIVE' },
-  });
+  const { data } = await apiClient.get<ApiResponse<Template[]>>('/api/catalogs/templates');
   return data.data;
 }

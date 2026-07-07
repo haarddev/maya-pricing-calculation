@@ -8,8 +8,11 @@ import type { AuthRequest } from './middleware/auth.js';
 import { authRouter } from './routes/auth.routes.js';
 import { catalogRouter } from './routes/catalog.routes.js';
 import { logRouter } from './routes/log.routes.js';
+import { settingsRouter } from './routes/settings.routes.js';
 import { templateRouter } from './routes/template.routes.js';
+import { userRouter } from './routes/user.routes.js';
 import * as logService from './services/log.service.js';
+import { ensureSettings } from './services/settings.service.js';
 import { AppError, sendError } from './utils/errors.js';
 
 const app = express();
@@ -27,6 +30,8 @@ app.use('/api/auth', authRouter);
 app.use('/api/templates', templateRouter);
 app.use('/api/catalogs', catalogRouter);
 app.use('/api/logs', logRouter);
+app.use('/api/settings', settingsRouter);
+app.use('/api/users', userRouter);
 
 app.use((_req, _res, next) => {
   next(new AppError(404, 'Route not found'));
@@ -47,6 +52,10 @@ app.use((err: unknown, req: express.Request, res: express.Response, _next: expre
   });
 
   sendError(res, err);
+});
+
+void ensureSettings().catch((error) => {
+  console.error('Failed to ensure app settings:', error);
 });
 
 void logService.seedDummyLogsIfNeeded().catch((error) => {

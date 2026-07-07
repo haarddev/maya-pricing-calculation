@@ -45,7 +45,7 @@ export function ConfirmDialog({
       <button
         type="button"
         aria-label="Close"
-        className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+        className="absolute inset-0 cursor-pointer bg-slate-900/50 backdrop-blur-sm"
         onClick={onCancel}
       />
       <div
@@ -57,7 +57,7 @@ export function ConfirmDialog({
         <button
           type="button"
           onClick={onCancel}
-          className="absolute end-4 top-4 rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+          className="absolute end-4 top-4 cursor-pointer rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
         >
           <X className="h-5 w-5" />
         </button>

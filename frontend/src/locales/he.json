@@ -6,7 +6,8 @@
   "nav": {
     "templates": "תבניות",
     "catalogs": "קטלוגים",
-    "monitoring": "לוגים וניטור"
+    "monitoring": "לוגים וניטור",
+    "settings": "הגדרות"
   },
   "auth": {
     "loginTitle": "התחברות למערכת Maya Pricing",
@@ -124,7 +125,8 @@
     "loading": "טוען...",
     "error": "משהו השתבש",
     "yes": "כן",
-    "no": "לא"
+    "no": "לא",
+    "close": "סגור"
   },
   "toast": {
     "loginSuccess": "התחברת בהצלחה",
@@ -149,6 +151,7 @@
     "filterCategory": "סינון לפי קטגוריה",
     "allCategories": "כל הקטגוריות",
     "noResults": "לא נמצאו לוגים",
+    "detailsTitle": "פרטי לוג",
     "sampleData": "נתוני דוגמה",
     "categories": {
       "INCOMING_REQUEST": "בקשות API נכנסות",
@@ -158,6 +161,10 @@
       "ERROR": "שגיאות"
     },
     "columns": {
+      "category": "קטגוריה",
+      "status": "סטטוס",
+      "method": "שיטה",
+      "time": "זמן",
       "path": "נתיב / נקודת קצה",
       "source": "מקור",
       "duration": "משך זמן",
@@ -179,6 +186,113 @@
       "errorCountHint": "סה״כ אירועי שגיאה שנרשמו",
       "successRate": "אחוז הצלחה",
       "successRateHint": "מבוסס על בקשות נכנסות מול שגיאות"
+    }
+  },
+  "settings": {
+    "title": "הגדרות",
+    "subtitle": "ניהול העדפות מערכת, אבטחה ומשתמשים",
+    "badge": "תצורה",
+    "save": "שמירת שינויים",
+    "tabs": {
+      "profile": "פרופיל",
+      "general": "כללי",
+      "security": "אבטחה",
+      "users": "משתמשים",
+      "sessions": "הפעלות"
+    },
+    "general": {
+      "title": "אפליקציה",
+      "appName": "שם האפליקציה",
+      "appNameHint": "מוצג בכותרת ובמסך ההתחברות"
+    },
+    "profile": {
+      "title": "פרופיל",
+      "name": "שם מלא",
+      "email": "כתובת אימייל"
+    },
+    "password": {
+      "title": "שינוי סיסמה",
+      "current": "סיסמה נוכחית",
+      "new": "סיסמה חדשה",
+      "confirm": "אימות סיסמה חדשה",
+      "change": "עדכון סיסמה"
+    },
+    "security": {
+      "title": "אבטחה וכללי קטלוג",
+      "subtitle": "הגדרת אימות, הגנת התחברות ומדיניות גישה לקטלוגים",
+      "sections": {
+        "auth": "אימות",
+        "loginProtection": "הגנת התחברות",
+        "catalogRules": "כללי קטלוג"
+      },
+      "jwtExpiresIn": "תוקף הפעלת JWT",
+      "jwtHint": "משך הזמן שמשתמשים נשארים מחוברים לפני התחברות מחדש",
+      "loginAttemptLimit": "מגבלת ניסיונות התחברות",
+      "loginAttemptHint": "מספר ניסיונות כושלים לפני נעילת החשבון",
+      "lockoutDuration": "משך נעילה (דקות)",
+      "lockoutHint": "משך הזמן שחשבון נעול נשאר חסום",
+      "allowOnlyActiveTemplates": "לאפשר רק תבניות ACTIVE לקטלוגים",
+      "allowOnlyActiveTemplatesHint": "כאשר מופעל, רק תבניות פעילות ניתנות לבחירה ביצירת קטלוגים"
+    },
+    "users": {
+      "addTitle": "הוספת משתמש",
+      "addHint": "חבר צוות חדש",
+      "listTitle": "ניהול משתמשים",
+      "subtitle": "יצירת חשבונות, הקצאת תפקידים וניהול גישה",
+      "empty": "לא נמצאו משתמשים",
+      "you": "אתה",
+      "add": "יצירת משתמש",
+      "password": "סיסמה זמנית",
+      "role": "תפקיד",
+      "disable": "השבתה",
+      "enable": "הפעלה",
+      "locked": "נעול",
+      "edit": "עריכה",
+      "delete": "מחיקה",
+      "editTitle": "עריכת משתמש",
+      "editSelfHint": "אתה עורך את החשבון שלך. לא ניתן להשבית את עצמך.",
+      "newPassword": "סיסמה חדשה",
+      "passwordOptional": "השאר ריק כדי לשמור על הנוכחית",
+      "passwordOptionalHint": "מלא רק אם ברצונך לאפס את סיסמת המשתמש.",
+      "unlockHint": "הגדר סטטוס לפעיל כדי לשחרר את הנעילה.",
+      "statusSelfHint": "לא ניתן להשבית את החשבון שלך.",
+      "deleteTitle": "מחיקת משתמש",
+      "deleteConfirm": "האם אתה בטוח שברצונך למחוק את \"{{name}}\"? פעולה זו לא ניתנת לביטול.",
+      "stats": {
+        "total": "סה״כ משתמשים",
+        "active": "פעילים",
+        "admins": "מנהלים",
+        "locked": "נעולים"
+      },
+      "columns": {
+        "user": "משתמש",
+        "status": "סטטוס",
+        "actions": "פעולות"
+      },
+      "statuses": {
+        "ACTIVE": "פעיל",
+        "DISABLED": "מושבת"
+      },
+      "roles": {
+        "ADMIN": "מנהל",
+        "USER": "משתמש"
+      }
+    },
+    "sessions": {
+      "title": "הפעלות",
+      "future": "התנתקות מכל המכשירים תתווסף בעדכון עתידי."
+    },
+    "toast": {
+      "generalSaved": "הגדרות האפליקציה נשמרו",
+      "securitySaved": "הגדרות האבטחה נשמרו",
+      "profileSaved": "הפרופיל עודכן בהצלחה",
+      "passwordSaved": "הסיסמה שונתה בהצלחה",
+      "userCreated": "המשתמש נוצר בהצלחה",
+      "userUpdated": "המשתמש עודכן בהצלחה",
+      "userDeleted": "המשתמש נמחק בהצלחה"
+    },
+    "errors": {
+      "currentPassword": "הסיסמה הנוכחית שגויה"
     }
   }
 }

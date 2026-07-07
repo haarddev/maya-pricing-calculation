@@ -1,9 +1,15 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { createColumnHelper } from '@tanstack/react-table';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { LogCategory, SystemLog } from '../../types/log.types';
-import { Card } from '../ui/Card';
 import { formatPrice } from '../../utils/catalogPricing';
+import { formatDateTime, getAppLocale } from '../../utils/formatDate';
+import { Card } from '../ui/Card';
+import { EmptyState } from '../ui/EmptyState';
+import { LabelBadge } from '../ui/LabelBadge';
+import { ResponsiveDataView } from '../ui/ResponsiveDataView';
+import { RowDetailPanel } from '../ui/RowDetailPanel';
 
 type LogTableProps = {
   logs: SystemLog[];
@@ -18,12 +24,7 @@ const ALL_CATEGORIES: LogCategory[] = [
   'ERROR',
 ];
 
-function statusColor(code: number | null) {
-  if (!code) return 'bg-slate-100 text-slate-700';
-  if (code >= 500) return 'bg-red-100 text-red-800';
-  if (code >= 400) return 'bg-amber-100 text-amber-800';
-  return 'bg-emerald-100 text-emerald-800';
-}
+const columnHelper = createColumnHelper<SystemLog>();
 
 function formatJson(value: unknown) {
   if (!value) return '—';
@@ -37,81 +38,145 @@ function formatJson(value: unknown) {
 export function LogTable({ logs, loading }: LogTableProps) {
   const { t, i18n } = useTranslation();
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const isHebrew = i18n.language.startsWith('he');
+  const locale = getAppLocale(i18n.language);
 
-  const formatDate = (date: string) =>
-    new Date(date).toLocaleString(isHebrew ? 'he-IL' : 'en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    });
+  const toggleRow = useCallback((log: SystemLog) => {
+    setExpandedId((current) => (current === log.id ? null : log.id));
+  }, []);
+
+  const closePanel = useCallback(() => setExpandedId(null), []);
 
   const priceOf = (log: SystemLog) => {
     if (log.calculatedPrice === null || log.calculatedPrice === undefined) return '—';
     const num = Number(log.calculatedPrice);
-    return Number.isNaN(num) ? '—' : formatPrice(num, isHebrew ? 'he' : 'en');
+    return Number.isNaN(num) ? '—' : formatPrice(num, locale);
   };
 
-  if (loading) {
-    return (
-      <Card className="py-16 text-center">
-        <p className="text-slate-500">{t('common.loading')}</p>
-      </Card>
-    );
-  }
+  const renderDetailPanel = (log: SystemLog) => (
+    <RowDetailPanel
+      title={t('logs.detailsTitle')}
+      closeLabel={t('common.close')}
+      onClose={closePanel}
+    >
+      <LogDetailPanels log={log} t={t} />
+    </RowDetailPanel>
+  );
 
-  if (logs.length === 0) {
-    return (
-      <Card className="py-16 text-center">
-        <p className="text-slate-500">{t('logs.noResults')}</p>
-      </Card>
-    );
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor('category', {
+        header: () => t('logs.columns.category'),
+        cell: ({ row }) => (
+          <div className="flex flex-wrap items-center gap-2">
+            <LabelBadge variant="brand">{t(`logs.categories.${row.original.category}`)}</LabelBadge>
+            {row.original.isDummy && (
+              <LabelBadge variant="warning">{t('logs.sampleData')}</LabelBadge>
+            )}
+          </div>
+        ),
+      }),
+      columnHelper.accessor('statusCode', {
+        header: () => t('logs.columns.status'),
+        cell: ({ row }) =>
+          row.original.statusCode !== null ? (
+            <LabelBadge variant="http" statusCode={row.original.statusCode}>
+              {row.original.statusCode}
+            </LabelBadge>
+          ) : (
+            '—'
+          ),
+      }),
+      columnHelper.accessor('method', {
+        header: () => t('logs.columns.method'),
+        cell: (info) => <span className="text-slate-600">{info.getValue() ?? '—'}</span>,
+      }),
+      columnHelper.accessor('path', {
+        header: () => t('logs.columns.path'),
+        cell: (info) => (
+          <span className="block max-w-[200px] truncate font-medium text-slate-800" title={info.getValue() ?? ''}>
+            {info.getValue() ?? '—'}
+          </span>
+        ),
+      }),
+      columnHelper.accessor('durationMs', {
+        header: () => t('logs.columns.duration'),
+        cell: (info) => (
+          <span className="text-slate-600">
+            {info.getValue() !== null ? `${info.getValue()}ms` : '—'}
+          </span>
+        ),
+      }),
+      columnHelper.display({
+        id: 'price',
+        header: () => t('logs.columns.price'),
+        cell: ({ row }) => <span className="font-medium text-brand-700">{priceOf(row.original)}</span>,
+      }),
+      columnHelper.accessor('createdAt', {
+        header: () => t('logs.columns.time'),
+        cell: (info) => (
+          <span className="text-slate-500">{formatDateTime(info.getValue(), locale)}</span>
+        ),
+      }),
+      columnHelper.display({
+        id: 'expand',
+        header: () => '',
+        meta: { align: 'center' as const },
+        cell: ({ row }) => {
+          const expanded = expandedId === row.original.id;
+          return (
+            <span className="inline-flex text-slate-400">
+              {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </span>
+          );
+        },
+      }),
+    ],
+    [expandedId, locale, priceOf, t],
+  );
+
+  if (loading) {
+    return <EmptyState message={t('common.loading')} />;
   }
 
   return (
-    <div className="space-y-3">
-      {logs.map((log) => {
+    <ResponsiveDataView
+      data={logs}
+      columns={columns}
+      emptyMessage={t('logs.noResults')}
+      minWidth="1100px"
+      getRowId={(row) => row.id}
+      expandedRowId={expandedId}
+      onRowClick={toggleRow}
+      renderExpandedRow={renderDetailPanel}
+      renderMobileCard={(log) => {
         const expanded = expandedId === log.id;
         return (
           <Card key={log.id} className="!p-0 overflow-hidden">
             <button
               type="button"
-              onClick={() => setExpandedId(expanded ? null : log.id)}
-              className="flex w-full items-start gap-3 p-4 text-start transition hover:bg-slate-50"
+              onClick={() => toggleRow(log)}
+              className={`flex w-full cursor-pointer items-start gap-3 p-4 text-start transition hover:bg-slate-50 ${
+                expanded ? 'bg-brand-50/40' : ''
+              }`}
             >
               <div className="min-w-0 flex-1 space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-lg bg-brand-50 px-2 py-1 text-xs font-semibold text-brand-700">
-                    {t(`logs.categories.${log.category}`)}
-                  </span>
-                  {log.isDummy && (
-                    <span className="rounded-lg bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-700">
-                      {t('logs.sampleData')}
-                    </span>
-                  )}
+                  <LabelBadge variant="brand">{t(`logs.categories.${log.category}`)}</LabelBadge>
+                  {log.isDummy && <LabelBadge variant="warning">{t('logs.sampleData')}</LabelBadge>}
                   {log.statusCode !== null && (
-                    <span
-                      className={`rounded-lg px-2 py-1 text-xs font-semibold ${statusColor(log.statusCode)}`}
-                    >
+                    <LabelBadge variant="http" statusCode={log.statusCode}>
                       {log.statusCode}
-                    </span>
+                    </LabelBadge>
                   )}
                   {log.method && (
                     <span className="text-xs font-medium text-slate-500">{log.method}</span>
                   )}
                 </div>
 
-                <div className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-2 text-sm sm:grid-cols-2">
                   <div>
                     <p className="text-xs text-slate-400">{t('logs.columns.path')}</p>
                     <p className="truncate font-medium text-slate-800">{log.path ?? '—'}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-400">{t('logs.columns.source')}</p>
-                    <p className="truncate font-medium text-slate-800">{log.source ?? '—'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-400">{t('logs.columns.duration')}</p>
@@ -125,27 +190,7 @@ export function LogTable({ logs, loading }: LogTableProps) {
                   </div>
                 </div>
 
-                {(log.pricingMethod || log.externalId || log.errorMessage) && (
-                  <div className="flex flex-wrap gap-3 text-xs text-slate-500">
-                    {log.pricingMethod && (
-                      <span>
-                        {t('logs.columns.pricingMethod')}: {log.pricingMethod}
-                      </span>
-                    )}
-                    {log.externalId && (
-                      <span>
-                        {t('logs.columns.externalId')}: {log.externalId}
-                      </span>
-                    )}
-                    {log.errorMessage && (
-                      <span className="text-red-600">
-                        {t('logs.columns.error')}: {log.errorMessage}
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                <p className="text-xs text-slate-400">{formatDate(log.createdAt)}</p>
+                <p className="text-xs text-slate-400">{formatDateTime(log.createdAt, locale)}</p>
               </div>
 
               <div className="shrink-0 pt-1 text-slate-400">
@@ -154,30 +199,61 @@ export function LogTable({ logs, loading }: LogTableProps) {
             </button>
 
             {expanded && (
-              <div className="border-t border-slate-100 bg-slate-50 p-4">
-                <div className="grid gap-4 lg:grid-cols-2">
-                  <div>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      {t('logs.columns.requestBody')}
-                    </p>
-                    <pre className="max-h-48 overflow-auto rounded-xl bg-white p-3 text-xs text-slate-700 ring-1 ring-slate-200">
-                      {formatJson(log.requestBody)}
-                    </pre>
-                  </div>
-                  <div>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      {t('logs.columns.responseBody')}
-                    </p>
-                    <pre className="max-h-48 overflow-auto rounded-xl bg-white p-3 text-xs text-slate-700 ring-1 ring-slate-200">
-                      {formatJson(log.responseBody)}
-                    </pre>
-                  </div>
-                </div>
+              <div className="border-t border-slate-100 bg-slate-50/80 p-2">
+                {renderDetailPanel(log)}
               </div>
             )}
           </Card>
         );
-      })}
+      }}
+    />
+  );
+}
+
+function LogDetailPanels({
+  log,
+  t,
+}: {
+  log: SystemLog;
+  t: (key: string) => string;
+}) {
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      <div>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          {t('logs.columns.requestBody')}
+        </p>
+        <pre className="max-h-48 overflow-auto rounded-xl bg-white p-3 text-xs text-slate-700 ring-1 ring-slate-200">
+          {formatJson(log.requestBody)}
+        </pre>
+      </div>
+      <div>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          {t('logs.columns.responseBody')}
+        </p>
+        <pre className="max-h-48 overflow-auto rounded-xl bg-white p-3 text-xs text-slate-700 ring-1 ring-slate-200">
+          {formatJson(log.responseBody)}
+        </pre>
+      </div>
+      {(log.pricingMethod || log.externalId || log.errorMessage) && (
+        <div className="lg:col-span-2 flex flex-wrap gap-3 text-xs text-slate-500">
+          {log.pricingMethod && (
+            <span>
+              {t('logs.columns.pricingMethod')}: {log.pricingMethod}
+            </span>
+          )}
+          {log.externalId && (
+            <span>
+              {t('logs.columns.externalId')}: {log.externalId}
+            </span>
+          )}
+          {log.errorMessage && (
+            <span className="text-red-600">
+              {t('logs.columns.error')}: {log.errorMessage}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

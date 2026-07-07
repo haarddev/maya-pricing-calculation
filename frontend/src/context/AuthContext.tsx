@@ -2,12 +2,11 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from 'react';
-import * as authApi from '../api/auth.api';
+import { useLogin, useLogout, useMe } from '../hooks/queries/auth';
 import type { User } from '../types/template.types';
 
 type AuthContextValue = {
@@ -16,68 +15,47 @@ type AuthContextValue = {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<User | undefined>;
   isAuthenticated: boolean;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
-    const stored = localStorage.getItem('user');
-    return stored ? (JSON.parse(stored) as User) : null;
-  });
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
-  const [loading, setLoading] = useState(true);
+  const { data: user, isLoading, refetch } = useMe(Boolean(token));
+  const loginMutation = useLogin();
+  const clearSession = useLogout();
 
-  useEffect(() => {
-    async function bootstrap() {
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const me = await authApi.getMe();
-        setUser(me);
-        localStorage.setItem('user', JSON.stringify(me));
-      } catch {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setToken(null);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    void bootstrap();
-  }, [token]);
-
-  const login = useCallback(async (email: string, password: string) => {
-    const result = await authApi.login(email, password);
-    localStorage.setItem('token', result.token);
-    localStorage.setItem('user', JSON.stringify(result.user));
-    setToken(result.token);
-    setUser(result.user);
-  }, []);
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const result = await loginMutation.mutateAsync({ email, password });
+      setToken(result.token);
+    },
+    [loginMutation],
+  );
 
   const logout = useCallback(() => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    clearSession();
     setToken(null);
-    setUser(null);
-  }, []);
+  }, [clearSession]);
+
+  const refreshUser = useCallback(async () => {
+    const result = await refetch();
+    return result.data;
+  }, [refetch]);
 
   const value = useMemo(
     () => ({
-      user,
+      user: user ?? null,
       token,
-      loading,
+      loading: Boolean(token) && isLoading && !user,
       login,
       logout,
+      refreshUser,
       isAuthenticated: Boolean(token && user),
     }),
-    [user, token, loading, login, logout],
+    [user, token, isLoading, login, logout, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

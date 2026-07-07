@@ -1,18 +1,30 @@
-import { useEffect, useState } from 'react';
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Plus, Trash2 } from 'lucide-react';
+import { createColumnHelper } from '@tanstack/react-table';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import * as templatesApi from '../api/templates.api';
+import { FormPageShell } from '../components/Layout/FormPageShell';
+import { BackButton } from '../components/ui/BackButton';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
+import { DataTable } from '../components/ui/DataTable';
+import { FormActionFooter } from '../components/ui/FormActionFooter';
+import { SectionCard } from '../components/ui/SectionCard';
+import { TableIconButton } from '../components/ui/TableIconButton';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { Textarea } from '../components/ui/Textarea';
 import { PageLoader } from '../components/ui/Spinner';
-import { showError, showSuccess } from '../utils/toast';
+import {
+  useAddTemplateField,
+  useCreateTemplate,
+  useDeleteTemplateField,
+  useTemplate,
+  useUpdateTemplate,
+} from '../hooks/queries/templates';
 import type {
   FieldType,
   PricingMethod,
@@ -54,6 +66,7 @@ const fieldSchema = z.object({
 
 type TemplateForm = z.infer<typeof templateSchema>;
 type FieldForm = z.infer<typeof fieldSchema>;
+const fieldColumnHelper = createColumnHelper<TemplateField>();
 
 export function TemplateFormPage() {
   const { t, i18n } = useTranslation();
@@ -62,10 +75,14 @@ export function TemplateFormPage() {
   const isEdit = Boolean(id);
   const isHebrew = i18n.language.startsWith('he');
 
-  const [loading, setLoading] = useState(isEdit);
-  const [saving, setSaving] = useState(false);
   const [fields, setFields] = useState<TemplateField[]>([]);
   const [showAddField, setShowAddField] = useState(false);
+
+  const { data: template, isLoading } = useTemplate(id);
+  const createTemplate = useCreateTemplate();
+  const updateTemplate = useUpdateTemplate(id ?? '');
+  const addField = useAddTemplateField(id ?? '');
+  const deleteField = useDeleteTemplateField(id ?? '');
 
   const {
     register,
@@ -106,55 +123,38 @@ export function TemplateFormPage() {
   const selectedFieldType = watchField('fieldType');
 
   useEffect(() => {
-    if (!id) return;
+    if (!template) return;
+    reset({
+      name: template.name,
+      description: template.description,
+      status: template.status,
+      pricingMethod: template.pricingMethod,
+    });
+    setFields(template.fields ?? []);
+  }, [template, reset]);
 
-    async function load() {
-      try {
-        const template = await templatesApi.getTemplate(id!);
-        reset({
-          name: template.name,
-          description: template.description,
-          status: template.status,
-          pricingMethod: template.pricingMethod,
-        });
-        setFields(template.fields ?? []);
-      } catch {
-        showError();
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    void load();
-  }, [id, reset, t]);
-
-  const onSubmit = async (data: TemplateForm) => {
-    setSaving(true);
-    try {
-      if (isEdit && id) {
-        await templatesApi.updateTemplate(id, {
+  const onSubmit = (data: TemplateForm) => {
+    if (isEdit && id) {
+      updateTemplate.mutate(
+        {
           name: data.name,
           description: data.description,
           status: data.status,
-        });
-        showSuccess('toast.templateUpdated');
-        navigate('/templates');
-      } else {
-        const created = await templatesApi.createTemplate(data);
-        showSuccess('toast.templateCreated');
-        navigate(`/templates/${created.id}`);
-      }
-    } catch {
-      showError();
-    } finally {
-      setSaving(false);
+        },
+        { onSuccess: () => navigate('/templates') },
+      );
+      return;
     }
+
+    createTemplate.mutate(data, {
+      onSuccess: (created) => navigate(`/templates/${created.id}`),
+    });
   };
 
-  const onAddField = async (data: FieldForm) => {
+  const onAddField = (data: FieldForm) => {
     if (!id) return;
-    try {
-      const field = await templatesApi.addTemplateField(id, {
+    addField.mutate(
+      {
         fieldKey: data.fieldKey,
         labelEn: data.labelEn,
         labelHe: data.labelHe,
@@ -163,45 +163,77 @@ export function TemplateFormPage() {
           ? data.options.split(',').map((o) => o.trim()).filter(Boolean)
           : undefined,
         required: data.required,
+      },
+      {
+        onSuccess: (field) => {
+          setFields((prev) => [...prev, field as TemplateField]);
+          resetField();
+          setShowAddField(false);
+        },
+      },
+    );
+  };
+
+  const onDeleteField = useCallback(
+    (fieldId: string) => {
+      if (!id) return;
+      deleteField.mutate(fieldId, {
+        onSuccess: () => setFields((prev) => prev.filter((f) => f.id !== fieldId)),
       });
-      setFields((prev) => [...prev, field as TemplateField]);
-      resetField();
-      setShowAddField(false);
-      showSuccess('toast.templateFieldAdded');
-    } catch {
-      showError();
-    }
-  };
+    },
+    [deleteField, id],
+  );
 
-  const onDeleteField = async (fieldId: string) => {
-    if (!id) return;
-    try {
-      await templatesApi.deleteTemplateField(id, fieldId);
-      setFields((prev) => prev.filter((f) => f.id !== fieldId));
-      showSuccess('toast.templateFieldDeleted');
-    } catch {
-      showError();
-    }
-  };
+  const fieldColumns = useMemo(
+    () => [
+      fieldColumnHelper.accessor('fieldKey', {
+        header: () => t('templates.fieldKey'),
+        cell: (info) => <span className="font-mono text-slate-900">{info.getValue()}</span>,
+      }),
+      fieldColumnHelper.display({
+        id: 'label',
+        header: () => (isHebrew ? t('templates.labelHe') : t('templates.labelEn')),
+        cell: ({ row }) => (
+          <span className="text-slate-600">
+            {isHebrew ? row.original.labelHe : row.original.labelEn}
+          </span>
+        ),
+      }),
+      fieldColumnHelper.accessor('fieldType', {
+        header: () => t('templates.fieldType'),
+        cell: (info) => <span className="text-slate-600">{t(`fieldType.${info.getValue()}`)}</span>,
+      }),
+      fieldColumnHelper.accessor('required', {
+        header: () => t('templates.required'),
+        cell: (info) => (
+          <span className="text-slate-600">{info.getValue() ? t('common.yes') : t('common.no')}</span>
+        ),
+      }),
+      fieldColumnHelper.display({
+        id: 'actions',
+        header: () => t('templates.actions'),
+        meta: { align: 'center' as const },
+        cell: ({ row }) => (
+          <TableIconButton
+            icon={Trash2}
+            title={t('templates.delete')}
+            variant="danger"
+            onClick={() => onDeleteField(row.original.id)}
+          />
+        ),
+      }),
+    ],
+    [isHebrew, onDeleteField, t],
+  );
 
-  if (loading) return <PageLoader />;
+  if (isEdit && isLoading) return <PageLoader />;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <Button variant="ghost" onClick={() => navigate('/templates')} className="!px-0">
-        <ArrowLeft className="h-4 w-4" />
-        {t('templates.cancel')}
-      </Button>
-
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-          {isEdit ? t('templates.edit') : t('templates.new')}
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          {isEdit ? t('templates.fieldsTitle') : t('templates.create')}
-        </p>
-      </div>
-
+    <FormPageShell
+      back={<BackButton to="/templates" label={t('templates.cancel')} />}
+      title={isEdit ? t('templates.edit') : t('templates.new')}
+      subtitle={isEdit ? t('templates.fieldsTitle') : t('templates.create')}
+    >
       <Card>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <Input
@@ -258,31 +290,27 @@ export function TemplateFormPage() {
             />
           )}
 
-          <div className="flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row">
-            <Button type="submit" loading={saving} className="sm:flex-1">
-              {t('templates.save')}
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => navigate('/templates')}
-              className="sm:flex-1"
-            >
-              {t('templates.cancel')}
-            </Button>
+          <div className="border-t border-slate-100 pt-5">
+            <FormActionFooter
+              saveLabel={t('templates.save')}
+              cancelLabel={t('templates.cancel')}
+              onCancel={() => navigate('/templates')}
+              loading={createTemplate.isPending || updateTemplate.isPending}
+            />
           </div>
         </form>
       </Card>
 
       {isEdit && (
-        <Card>
-          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">{t('templates.fieldsTitle')}</h2>
+        <SectionCard
+          title={t('templates.fieldsTitle')}
+          actions={
             <Button variant="secondary" onClick={() => setShowAddField((v) => !v)}>
               <Plus className="h-4 w-4" />
               {t('templates.addField')}
             </Button>
-          </div>
+          }
+        >
 
           {showAddField && (
             <form
@@ -380,53 +408,17 @@ export function TemplateFormPage() {
           </div>
 
           {/* Desktop fields table */}
-          <div className="hidden overflow-x-auto lg:block">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 text-start">
-                  <th className="pb-3 font-semibold text-slate-600">{t('templates.fieldKey')}</th>
-                  <th className="pb-3 font-semibold text-slate-600">
-                    {isHebrew ? t('templates.labelHe') : t('templates.labelEn')}
-                  </th>
-                  <th className="pb-3 font-semibold text-slate-600">{t('templates.fieldType')}</th>
-                  <th className="pb-3 font-semibold text-slate-600">{t('templates.required')}</th>
-                  <th className="pb-3 text-center font-semibold text-slate-600">{t('templates.actions')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {fields.map((field) => (
-                  <tr key={field.id} className="border-b border-slate-100 last:border-0">
-                    <td className="py-3 font-mono text-slate-900">{field.fieldKey}</td>
-                    <td className="py-3 text-slate-600">
-                      {isHebrew ? field.labelHe : field.labelEn}
-                    </td>
-                    <td className="py-3 text-slate-600">{t(`fieldType.${field.fieldType}`)}</td>
-                    <td className="py-3 text-slate-600">
-                      {field.required ? t('common.yes') : t('common.no')}
-                    </td>
-                    <td className="py-3 text-center">
-                      <button
-                        type="button"
-                        onClick={() => void onDeleteField(field.id)}
-                        className="rounded-lg p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {fields.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="py-8 text-center text-slate-500">
-                      {t('templates.noResults')}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+          <div className="hidden lg:block">
+            <DataTable
+              data={fields}
+              columns={fieldColumns}
+              emptyMessage={t('templates.noResults')}
+              minWidth="700px"
+              getRowId={(row) => row.id}
+            />
           </div>
-        </Card>
+        </SectionCard>
       )}
-    </div>
+    </FormPageShell>
   );
 }

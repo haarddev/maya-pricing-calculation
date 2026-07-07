@@ -13,3 +13,12 @@ export async function getMe() {
   const { data } = await apiClient.get<ApiResponse<User>>('/api/auth/me');
   return data.data;
 }
+
+export async function updateProfile(input: { name?: string; email?: string }) {
+  const { data } = await apiClient.put<ApiResponse<User>>('/api/auth/profile', input);
+  return data.data;
+}
+
+export async function changePassword(input: { currentPassword: string; newPassword: string }) {
+  await apiClient.put('/api/auth/password', input);
+}

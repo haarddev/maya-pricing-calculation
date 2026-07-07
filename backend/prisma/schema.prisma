@@ -45,15 +45,29 @@ enum LogCategory {
   ERROR
 }
 
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+}
+
 model User {
-  id           String     @id @default(uuid())
-  email        String     @unique
-  passwordHash String     @map("password_hash")
-  name         String
-  createdAt    DateTime   @default(now()) @map("created_at")
-  updatedAt    DateTime   @updatedAt @map("updated_at")
-  templates    Template[]
-  catalogs     Catalog[]
+  id            String     @id @default(uuid())
+  email         String     @unique
+  passwordHash  String     @map("password_hash")
+  name          String
+  role          UserRole   @default(USER)
+  status        UserStatus @default(ACTIVE)
+  loginAttempts Int        @default(0) @map("login_attempts")
+  lockedUntil   DateTime?  @map("locked_until")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+  templates     Template[]
+  catalogs      Catalog[]
 
   @@map("users")
 }
@@ -127,4 +141,16 @@ model SystemLog {
 
   @@index([category, createdAt])
   @@map("system_logs")
+}
+
+model AppSettings {
+  id                         String   @id @default("default")
+  appName                    String   @default("Maya Pricing") @map("app_name")
+  jwtExpiresIn               String   @default("7d") @map("jwt_expires_in")
+  loginAttemptLimit          Int      @default(5) @map("login_attempt_limit")
+  lockoutDurationMinutes     Int      @default(15) @map("lockout_duration_minutes")
+  allowOnlyActiveTemplates   Boolean  @default(true) @map("allow_only_active_templates")
+  updatedAt                  DateTime @updatedAt @map("updated_at")
+
+  @@map("app_settings")
 }

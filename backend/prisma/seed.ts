@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
-import { PrismaClient, TemplateStatus } from '@prisma/client';
+import { PrismaClient, TemplateStatus, UserRole } from '@prisma/client';
 import { seedDummyLogsIfNeeded } from '../src/services/log.service.js';
+import { ensureSettings } from '../src/services/settings.service.js';
 
 const prisma = new PrismaClient();
 
@@ -9,13 +10,16 @@ async function main() {
 
   const admin = await prisma.user.upsert({
     where: { email: 'admin@maya.local' },
-    update: {},
+    update: { role: UserRole.ADMIN, status: 'ACTIVE' },
     create: {
       email: 'admin@maya.local',
       passwordHash,
       name: 'Admin User',
+      role: UserRole.ADMIN,
     },
   });
+
+  await ensureSettings();
 
   const existingTemplates = await prisma.template.count();
   if (existingTemplates === 0) {
