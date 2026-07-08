@@ -1,13 +1,16 @@
 import {
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
   useReactTable,
   type ColumnDef,
+  type SortingState,
 } from '@tanstack/react-table';
 import type { ReactNode } from 'react';
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import { Card } from './Card';
 import { EmptyState } from './EmptyState';
+import { SortableTableHeader } from './SortableTableHeader';
 
 type DataTableProps<T> = {
   data: T[];
@@ -20,6 +23,8 @@ type DataTableProps<T> = {
   onRowClick?: (row: T) => void;
   renderExpandedRow?: (row: T) => ReactNode;
   isRowExpanded?: (row: T) => boolean;
+  defaultSorting?: SortingState;
+  enableSorting?: boolean;
 };
 
 export function DataTable<T>({
@@ -32,11 +37,19 @@ export function DataTable<T>({
   onRowClick,
   renderExpandedRow,
   isRowExpanded,
+  defaultSorting = [],
+  enableSorting = true,
 }: DataTableProps<T>) {
+  const [sorting, setSorting] = useState<SortingState>(defaultSorting);
+
   const table = useReactTable({
     data,
     columns,
+    state: { sorting },
+    onSortingChange: setSorting,
+    enableSorting,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     getRowId,
   });
 
@@ -51,18 +64,31 @@ export function DataTable<T>({
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id} className="border-b border-slate-200 bg-slate-50/80 text-start">
-                {headerGroup.headers.map((header) => (
+                {headerGroup.headers.map((header) => {
+                  const sorted = header.column.getIsSorted();
+                  return (
                   <th
                     key={header.id}
+                    aria-sort={
+                      sorted === 'asc'
+                        ? 'ascending'
+                        : sorted === 'desc'
+                          ? 'descending'
+                          : undefined
+                    }
                     className={`px-5 py-3 font-semibold text-slate-600 ${
                       header.column.columnDef.meta?.align === 'center' ? 'text-center' : ''
                     }`}
                   >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
+                    {header.isPlaceholder ? null : (
+                      <SortableTableHeader
+                        header={header}
+                        align={header.column.columnDef.meta?.align}
+                      />
+                    )}
                   </th>
-                ))}
+                );
+                })}
               </tr>
             ))}
           </thead>
@@ -83,7 +109,7 @@ export function DataTable<T>({
                     {row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
-                        className={`px-5 py-4 ${
+                        className={`px-5 py-4 align-top ${
                           cell.column.columnDef.meta?.align === 'center' ? 'text-center' : ''
                         }`}
                       >

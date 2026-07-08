@@ -28,6 +28,7 @@
     "new": "תבנית חדשה",
     "name": "שם תבנית",
     "description": "תיאור",
+    "supplementsAdditions": "תוספות / השלמות",
     "status": "סטטוס",
     "type": "שיטת תמחור",
     "fieldCount": "שדות",
@@ -111,7 +112,11 @@
     "PRICE_BY_HOURS": "מחיר לפי שעות",
     "PRICE_BY_ROUTE": "מחיר לפי מסלול",
     "PRICE_BY_DISTANCE": "מחיר לפי מרחק",
-    "PRICE_BY_AREA": "מחיר לפי אזור"
+    "PRICE_BY_AREA": "מחיר לפי אזור",
+    "PRICE_BY_PASSENGERS": "מחיר לפי מספר נוסעים",
+    "PRICE_BY_SKU": "מחיר לפי מק\"ט",
+    "PRICE_BY_MINUTES": "מחיר לפי דקות",
+    "PRICE_BY_KM_AND_HOURS": "מחיר לפי ק\"מ ושעות"
   },
   "fieldType": {
     "TEXT": "טקסט",
@@ -126,7 +131,10 @@
     "error": "משהו השתבש",
     "yes": "כן",
     "no": "לא",
-    "close": "סגור"
+    "close": "סגור",
+    "sortAsc": "מיון עולה",
+    "sortDesc": "מיון יורד",
+    "sortClear": "ביטול מיון"
   },
   "toast": {
     "loginSuccess": "התחברת בהצלחה",

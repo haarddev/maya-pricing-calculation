@@ -17,6 +17,8 @@ export function calculateCatalogPrice(
   switch (pricingMethod) {
     case 'PRICE_BY_DESTINATION':
     case 'PRICE_BY_AREA':
+    case 'PRICE_BY_PASSENGERS':
+    case 'PRICE_BY_SKU':
       return toNumber(fieldValues.price);
     case 'PRICE_BY_ROUTE':
       return toNumber(fieldValues.fixed_price);
@@ -25,6 +27,22 @@ export function calculateCatalogPrice(
       const rate = toNumber(fieldValues.price_per_hour);
       if (hours !== null && rate !== null) return hours * rate;
       return rate;
+    }
+    case 'PRICE_BY_MINUTES': {
+      const minutes = toNumber(fieldValues.minutes);
+      const rate = toNumber(fieldValues.price_per_minute);
+      if (minutes !== null && rate !== null) return minutes * rate;
+      return rate;
+    }
+    case 'PRICE_BY_KM_AND_HOURS': {
+      const km = toNumber(fieldValues.km);
+      const hours = toNumber(fieldValues.hours);
+      const kmRate = toNumber(fieldValues.price_per_km);
+      const hourRate = toNumber(fieldValues.price_per_hour);
+      let total = 0;
+      if (km !== null && kmRate !== null) total += km * kmRate;
+      if (hours !== null && hourRate !== null) total += hours * hourRate;
+      return total > 0 ? total : null;
     }
     case 'PRICE_BY_DISTANCE':
       return toNumber(fieldValues.price_per_km);

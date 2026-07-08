@@ -25,8 +25,10 @@ export function MobileEntityCard({
     <Card className="transition hover:shadow-md">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-semibold text-slate-900">{title}</h3>
-          {subtitle && <p className="mt-1 text-sm text-slate-500">{subtitle}</p>}
+          <h3 className="whitespace-normal break-words font-semibold text-slate-900">{title}</h3>
+          {subtitle && (
+            <p className="mt-1 whitespace-normal break-words text-sm text-slate-500">{subtitle}</p>
+          )}
         </div>
         {badge}
       </div>

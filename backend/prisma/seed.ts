@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { PrismaClient, TemplateStatus, UserRole } from '@prisma/client';
 import { seedDummyLogsIfNeeded } from '../src/services/log.service.js';
 import { ensureSettings } from '../src/services/settings.service.js';
+import { seedClientTemplates } from './seed-client-templates.js';
 
 const prisma = new PrismaClient();
 
@@ -86,6 +87,11 @@ async function main() {
         },
       },
     });
+  }
+
+  const clientTemplatesCreated = await seedClientTemplates(prisma, admin.id);
+  if (clientTemplatesCreated > 0) {
+    console.log(`Created ${clientTemplatesCreated} client templates`);
   }
 
   const existingCatalogs = await prisma.catalog.count();

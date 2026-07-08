@@ -63,11 +63,19 @@ const defaultFieldsByMethod: Record<PricingMethod, DefaultField[]> = {
       sortOrder: 0,
     },
     {
+      fieldKey: 'vehicle_type',
+      labelEn: 'Vehicle Type',
+      labelHe: 'סוג רכב',
+      fieldType: FieldType.DROPDOWN,
+      options: ['Sedan', 'Van', 'Bus', 'Minibus'],
+      sortOrder: 1,
+    },
+    {
       fieldKey: 'fixed_price',
       labelEn: 'Fixed Price',
       labelHe: 'מחיר קבוע',
       fieldType: FieldType.NUMBER,
-      sortOrder: 1,
+      sortOrder: 2,
     },
   ],
   PRICE_BY_DISTANCE: [
@@ -95,6 +103,55 @@ const defaultFieldsByMethod: Record<PricingMethod, DefaultField[]> = {
       sortOrder: 0,
     },
     {
+      fieldKey: 'vehicle_type',
+      labelEn: 'Vehicle Type',
+      labelHe: 'סוג רכב',
+      fieldType: FieldType.DROPDOWN,
+      options: ['Sedan', 'Van', 'Bus', 'Minibus'],
+      sortOrder: 1,
+    },
+    {
+      fieldKey: 'price',
+      labelEn: 'Price',
+      labelHe: 'מחיר',
+      fieldType: FieldType.NUMBER,
+      sortOrder: 2,
+    },
+  ],
+  PRICE_BY_PASSENGERS: [
+    {
+      fieldKey: 'passenger_tier',
+      labelEn: 'Passenger Tier',
+      labelHe: 'דרגת נוסעים',
+      fieldType: FieldType.DROPDOWN,
+      options: ['Up to 2', 'Up to 4', 'Larger group'],
+      sortOrder: 0,
+    },
+    {
+      fieldKey: 'vehicle_type',
+      labelEn: 'Vehicle Type',
+      labelHe: 'סוג רכב',
+      fieldType: FieldType.DROPDOWN,
+      options: ['Sedan', 'Van', 'Bus', 'Minibus'],
+      sortOrder: 1,
+    },
+    {
+      fieldKey: 'price',
+      labelEn: 'Price',
+      labelHe: 'מחיר',
+      fieldType: FieldType.NUMBER,
+      sortOrder: 2,
+    },
+  ],
+  PRICE_BY_SKU: [
+    {
+      fieldKey: 'sku',
+      labelEn: 'SKU / Catalog Number',
+      labelHe: 'מק"ט / מספר קטלוג',
+      fieldType: FieldType.TEXT,
+      sortOrder: 0,
+    },
+    {
       fieldKey: 'price',
       labelEn: 'Price',
       labelHe: 'מחיר',
@@ -102,11 +159,58 @@ const defaultFieldsByMethod: Record<PricingMethod, DefaultField[]> = {
       sortOrder: 1,
     },
   ],
+  PRICE_BY_MINUTES: [
+    {
+      fieldKey: 'minutes',
+      labelEn: 'Minutes',
+      labelHe: 'דקות',
+      fieldType: FieldType.NUMBER,
+      sortOrder: 0,
+    },
+    {
+      fieldKey: 'price_per_minute',
+      labelEn: 'Price per Minute',
+      labelHe: 'מחיר לדקה',
+      fieldType: FieldType.NUMBER,
+      sortOrder: 1,
+    },
+  ],
+  PRICE_BY_KM_AND_HOURS: [
+    {
+      fieldKey: 'km',
+      labelEn: 'Kilometers',
+      labelHe: 'קילומטרים',
+      fieldType: FieldType.NUMBER,
+      sortOrder: 0,
+    },
+    {
+      fieldKey: 'hours',
+      labelEn: 'Hours',
+      labelHe: 'שעות',
+      fieldType: FieldType.NUMBER,
+      sortOrder: 1,
+    },
+    {
+      fieldKey: 'price_per_km',
+      labelEn: 'Price per Kilometer',
+      labelHe: 'מחיר לקילומטר',
+      fieldType: FieldType.NUMBER,
+      sortOrder: 2,
+    },
+    {
+      fieldKey: 'price_per_hour',
+      labelEn: 'Price per Hour',
+      labelHe: 'מחיר לשעה',
+      fieldType: FieldType.NUMBER,
+      sortOrder: 3,
+    },
+  ],
 };
 
 const createTemplateSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
+  supplementsAdditions: z.string().optional(),
   status: z.nativeEnum(TemplateStatus).optional(),
   pricingMethod: z.nativeEnum(PricingMethod),
 });
@@ -114,6 +218,7 @@ const createTemplateSchema = z.object({
 const updateTemplateSchema = z.object({
   name: z.string().min(1).optional(),
   description: z.string().optional(),
+  supplementsAdditions: z.string().optional(),
   status: z.nativeEnum(TemplateStatus).optional(),
 });
 
@@ -183,6 +288,7 @@ export async function createTemplate(input: unknown, userId: string) {
     data: {
       name: data.name,
       description: data.description ?? '',
+      supplementsAdditions: data.supplementsAdditions ?? '',
       status: data.status ?? TemplateStatus.DRAFT,
       pricingMethod: data.pricingMethod,
       createdById: userId,

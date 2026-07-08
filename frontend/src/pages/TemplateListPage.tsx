@@ -31,17 +31,15 @@ import type { PricingMethod, Template, TemplateStatus } from '../types/template.
 const ALL_STATUSES: TemplateStatus[] = ['ACTIVE', 'DISABLED', 'DRAFT', 'EXPIRED'];
 
 const ALL_METHODS: PricingMethod[] = [
-
   'PRICE_BY_DESTINATION',
-
   'PRICE_BY_HOURS',
-
   'PRICE_BY_ROUTE',
-
   'PRICE_BY_DISTANCE',
-
   'PRICE_BY_AREA',
-
+  'PRICE_BY_PASSENGERS',
+  'PRICE_BY_SKU',
+  'PRICE_BY_MINUTES',
+  'PRICE_BY_KM_AND_HOURS',
 ];
 
 

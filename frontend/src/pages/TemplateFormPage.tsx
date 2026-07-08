@@ -39,12 +39,17 @@ const ALL_METHODS: PricingMethod[] = [
   'PRICE_BY_ROUTE',
   'PRICE_BY_DISTANCE',
   'PRICE_BY_AREA',
+  'PRICE_BY_PASSENGERS',
+  'PRICE_BY_SKU',
+  'PRICE_BY_MINUTES',
+  'PRICE_BY_KM_AND_HOURS',
 ];
 const ALL_FIELD_TYPES: FieldType[] = ['TEXT', 'NUMBER', 'DROPDOWN', 'BOOLEAN', 'DATE', 'TIME'];
 
 const templateSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
+  supplementsAdditions: z.string().optional(),
   status: z.enum(['ACTIVE', 'DISABLED', 'DRAFT', 'EXPIRED']),
   pricingMethod: z.enum([
     'PRICE_BY_DESTINATION',
@@ -52,6 +57,10 @@ const templateSchema = z.object({
     'PRICE_BY_ROUTE',
     'PRICE_BY_DISTANCE',
     'PRICE_BY_AREA',
+    'PRICE_BY_PASSENGERS',
+    'PRICE_BY_SKU',
+    'PRICE_BY_MINUTES',
+    'PRICE_BY_KM_AND_HOURS',
   ]),
 });
 
@@ -96,6 +105,7 @@ export function TemplateFormPage() {
     defaultValues: {
       name: '',
       description: '',
+      supplementsAdditions: '',
       status: 'DRAFT',
       pricingMethod: 'PRICE_BY_DISTANCE',
     },
@@ -127,6 +137,7 @@ export function TemplateFormPage() {
     reset({
       name: template.name,
       description: template.description,
+      supplementsAdditions: template.supplementsAdditions ?? '',
       status: template.status,
       pricingMethod: template.pricingMethod,
     });
@@ -139,6 +150,7 @@ export function TemplateFormPage() {
         {
           name: data.name,
           description: data.description,
+          supplementsAdditions: data.supplementsAdditions,
           status: data.status,
         },
         { onSuccess: () => navigate('/templates') },
@@ -244,6 +256,11 @@ export function TemplateFormPage() {
           <Textarea
             {...register('description')}
             label={t('templates.description')}
+            rows={3}
+          />
+          <Textarea
+            {...register('supplementsAdditions')}
+            label={t('templates.supplementsAdditions')}
             rows={3}
           />
           <Controller

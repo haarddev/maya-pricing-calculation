@@ -20,6 +20,10 @@ enum PricingMethod {
   PRICE_BY_ROUTE
   PRICE_BY_DISTANCE
   PRICE_BY_AREA
+  PRICE_BY_PASSENGERS
+  PRICE_BY_SKU
+  PRICE_BY_MINUTES
+  PRICE_BY_KM_AND_HOURS
 }
 
 enum FieldType {
@@ -73,11 +77,12 @@ model User {
 }
 
 model Template {
-  id            String         @id @default(uuid())
-  name          String
-  description   String         @default("")
-  status        TemplateStatus @default(DRAFT)
-  pricingMethod PricingMethod  @map("pricing_method")
+  id                   String         @id @default(uuid())
+  name                 String
+  description          String         @default("")
+  supplementsAdditions String         @default("") @map("supplements_additions")
+  status               TemplateStatus @default(DRAFT)
+  pricingMethod        PricingMethod  @map("pricing_method")
   createdById   String         @map("created_by_id")
   createdBy     User           @relation(fields: [createdById], references: [id])
   createdAt     DateTime       @default(now()) @map("created_at")

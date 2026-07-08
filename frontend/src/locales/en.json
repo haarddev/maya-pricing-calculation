@@ -28,6 +28,7 @@
     "new": "New Template",
     "name": "Template Name",
     "description": "Description",
+    "supplementsAdditions": "Supplements / Additions",
     "status": "Status",
     "type": "Pricing Method",
     "fieldCount": "Fields",
@@ -111,7 +112,11 @@
     "PRICE_BY_HOURS": "Price by Hours",
     "PRICE_BY_ROUTE": "Price by Route",
     "PRICE_BY_DISTANCE": "Price by Distance",
-    "PRICE_BY_AREA": "Price by Area"
+    "PRICE_BY_AREA": "Price by Area",
+    "PRICE_BY_PASSENGERS": "Price by Passengers",
+    "PRICE_BY_SKU": "Price by SKU",
+    "PRICE_BY_MINUTES": "Price by Minutes",
+    "PRICE_BY_KM_AND_HOURS": "Price by Km & Hours"
   },
   "fieldType": {
     "TEXT": "Text",
@@ -126,7 +131,10 @@
     "error": "Something went wrong",
     "yes": "Yes",
     "no": "No",
-    "close": "Close"
+    "close": "Close",
+    "sortAsc": "Sort ascending",
+    "sortDesc": "Sort descending",
+    "sortClear": "Clear sort"
   },
   "toast": {
     "loginSuccess": "Signed in successfully",

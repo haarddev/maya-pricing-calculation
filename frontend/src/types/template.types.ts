@@ -5,7 +5,11 @@ export type PricingMethod =
   | 'PRICE_BY_HOURS'
   | 'PRICE_BY_ROUTE'
   | 'PRICE_BY_DISTANCE'
-  | 'PRICE_BY_AREA';
+  | 'PRICE_BY_AREA'
+  | 'PRICE_BY_PASSENGERS'
+  | 'PRICE_BY_SKU'
+  | 'PRICE_BY_MINUTES'
+  | 'PRICE_BY_KM_AND_HOURS';
 
 export type FieldType = 'TEXT' | 'NUMBER' | 'DROPDOWN' | 'BOOLEAN' | 'DATE' | 'TIME';
 
@@ -33,6 +37,7 @@ export type Template = {
   id: string;
   name: string;
   description: string;
+  supplementsAdditions: string;
   status: TemplateStatus;
   pricingMethod: PricingMethod;
   createdById: string;
@@ -57,6 +62,7 @@ export type LoginResponse = {
 export type CreateTemplateInput = {
   name: string;
   description?: string;
+  supplementsAdditions?: string;
   status?: TemplateStatus;
   pricingMethod: PricingMethod;
 };
@@ -64,6 +70,7 @@ export type CreateTemplateInput = {
 export type UpdateTemplateInput = {
   name?: string;
   description?: string;
+  supplementsAdditions?: string;
   status?: TemplateStatus;
 };
 
