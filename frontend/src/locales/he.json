@@ -1,7 +1,9 @@
 {
   "app": {
     "title": "Maya Pricing",
-    "logout": "התנתקות"
+    "logout": "התנתקות",
+    "openMenu": "פתח תפריט",
+    "closeMenu": "סגור תפריט"
   },
   "nav": {
     "templates": "תבניות",
@@ -55,7 +57,11 @@
     "fieldType": "סוג שדה",
     "required": "חובה",
     "options": "אפשרויות (מופרדות בפסיק)",
-    "createdBy": "נוצר על ידי"
+    "createdBy": "נוצר על ידי",
+    "download": "הורדה",
+    "downloadCsv": "הורדת CSV",
+    "downloadJson": "הורדת JSON",
+    "downloadAll": "ייצוא תבניות"
   },
   "catalogs": {
     "title": "קטלוגי תמחור",

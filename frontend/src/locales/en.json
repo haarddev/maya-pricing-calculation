@@ -1,7 +1,9 @@
 {
   "app": {
     "title": "Maya Pricing",
-    "logout": "Logout"
+    "logout": "Logout",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "nav": {
     "templates": "Templates",
@@ -55,7 +57,11 @@
     "fieldType": "Field Type",
     "required": "Required",
     "options": "Options (comma separated)",
-    "createdBy": "Created by"
+    "createdBy": "Created by",
+    "download": "Download",
+    "downloadCsv": "Download CSV",
+    "downloadJson": "Download JSON",
+    "downloadAll": "Export Templates"
   },
   "catalogs": {
     "title": "Pricing Catalogs",

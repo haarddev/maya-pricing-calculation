@@ -1,10 +1,12 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { createColumnHelper } from '@tanstack/react-table';
-import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Download, Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import type { PricingMethod, Template } from '../../types/template.types';
 import { formatDate, getAppLocale } from '../../utils/formatDate';
+import { downloadTemplateById } from '../../utils/templateExport';
+import { showError } from '../../utils/toast';
 import { Button } from '../ui/Button';
 import { EmptyState } from '../ui/EmptyState';
 import { MobileEntityCard } from '../ui/MobileEntityCard';
@@ -23,6 +25,18 @@ export function TemplateTable({ templates, onDelete }: TemplateTableProps) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const locale = getAppLocale(i18n.language);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const handleDownload = async (template: Template) => {
+    setDownloadingId(template.id);
+    try {
+      await downloadTemplateById(template.id, 'json', t);
+    } catch {
+      showError();
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const columns = useMemo(
     () => [
@@ -91,6 +105,12 @@ export function TemplateTable({ templates, onDelete }: TemplateTableProps) {
               onClick={() => navigate(`/templates/${row.original.id}`)}
             />
             <TableIconButton
+              icon={Download}
+              title={t('templates.download')}
+              disabled={downloadingId === row.original.id}
+              onClick={() => void handleDownload(row.original)}
+            />
+            <TableIconButton
               icon={Trash2}
               title={t('templates.delete')}
               variant="danger"
@@ -100,7 +120,7 @@ export function TemplateTable({ templates, onDelete }: TemplateTableProps) {
         ),
       }),
     ],
-    [locale, navigate, onDelete, t],
+    [downloadingId, locale, navigate, onDelete, t],
   );
 
   return (
@@ -137,6 +157,14 @@ export function TemplateTable({ templates, onDelete }: TemplateTableProps) {
               >
                 <Eye className="h-4 w-4" />
                 {t('templates.view')}
+              </Button>
+              <Button
+                variant="secondary"
+                className="!px-3"
+                disabled={downloadingId === template.id}
+                onClick={() => void handleDownload(template)}
+              >
+                <Download className="h-4 w-4" />
               </Button>
               <Button variant="danger" className="!px-3" onClick={() => onDelete(template)}>
                 <Trash2 className="h-4 w-4" />

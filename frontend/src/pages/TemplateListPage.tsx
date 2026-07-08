@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
 
 import { useNavigate } from 'react-router-dom';
 
+import { DownloadMenu } from '../components/catalogs/DownloadMenu';
+
 import { TemplateTable } from '../components/templates/TemplateTable';
 
 import { ListPageLayout } from '../components/Layout/ListPageLayout';
@@ -25,6 +27,10 @@ import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useDeleteTemplate, useTemplates } from '../hooks/queries/templates';
 
 import type { PricingMethod, Template, TemplateStatus } from '../types/template.types';
+
+import { downloadAllTemplates } from '../utils/templateExport';
+
+import { showError } from '../utils/toast';
 
 
 
@@ -58,6 +64,8 @@ export function TemplateListPage() {
 
   const [deleteTarget, setDeleteTarget] = useState<Template | null>(null);
 
+  const [downloadingAll, setDownloadingAll] = useState(false);
+
 
 
   const debouncedSearch = useDebouncedValue(search);
@@ -88,6 +96,17 @@ export function TemplateListPage() {
 
   };
 
+  const handleDownloadAll = async (format: 'csv' | 'json') => {
+    setDownloadingAll(true);
+    try {
+      await downloadAllTemplates(templates, format, t);
+    } catch {
+      showError();
+    } finally {
+      setDownloadingAll(false);
+    }
+  };
+
 
 
   return (
@@ -104,13 +123,31 @@ export function TemplateListPage() {
 
           actions={
 
-            <Button onClick={() => navigate('/templates/new')} className="w-full sm:w-auto">
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
 
-              <Plus className="h-4 w-4" />
+              <DownloadMenu
 
-              {t('templates.create')}
+                label={t('templates.downloadAll')}
 
-            </Button>
+                disabled={templates.length === 0 || isLoading || downloadingAll}
+
+                csvLabel={t('templates.downloadCsv')}
+
+                jsonLabel={t('templates.downloadJson')}
+
+                onDownload={(format) => void handleDownloadAll(format)}
+
+              />
+
+              <Button onClick={() => navigate('/templates/new')} className="w-full sm:w-auto">
+
+                <Plus className="h-4 w-4" />
+
+                {t('templates.create')}
+
+              </Button>
+
+            </div>
 
           }
 
