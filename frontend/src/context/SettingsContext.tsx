@@ -1,10 +1,12 @@
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
 import { usePublicSettings, useSettings, useUpdateSettings } from '../hooks/queries/settings';
 import type { AppSettings } from '../types/settings.types';
+import { DEFAULT_CURRENCY } from '../utils/currency';
 
 type SettingsContextValue = {
   settings: AppSettings | undefined;
   appName: string;
+  currency: string;
   loading: boolean;
   updateAppSettings: (input: Partial<AppSettings>) => Promise<AppSettings>;
 };
@@ -21,16 +23,18 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   const settings = hasToken ? settingsQuery.data : undefined;
   const appName = settings?.appName ?? publicQuery.data?.appName ?? DEFAULT_APP_NAME;
+  const currency = settings?.currency ?? publicQuery.data?.currency ?? DEFAULT_CURRENCY;
   const loading = hasToken ? settingsQuery.isLoading && !settingsQuery.data : publicQuery.isLoading;
 
   const value = useMemo(
     () => ({
       settings,
       appName,
+      currency,
       loading,
       updateAppSettings: (input: Partial<AppSettings>) => updateMutation.mutateAsync(input),
     }),
-    [settings, appName, loading, updateMutation],
+    [settings, appName, currency, loading, updateMutation],
   );
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;

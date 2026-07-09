@@ -26,7 +26,8 @@ import {
 import { showError } from '../utils/toast';
 import type { Catalog, FieldValues } from '../types/catalog.types';
 import type { PricingMethod, Template, TemplateField } from '../types/template.types';
-import { calculateCatalogPrice, formatPrice } from '../utils/catalogPricing';
+import { calculateCatalogPrice } from '../utils/catalogPricing';
+import { useFormatPrice } from '../hooks/useFormatPrice';
 import { downloadCatalog } from '../utils/catalogExport';
 
 const ALL_STATUSES = ['ACTIVE', 'DISABLED', 'DRAFT'] as const;
@@ -46,6 +47,7 @@ export function CatalogFormPage() {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const isHebrew = i18n.language.startsWith('he');
+  const formatPrice = useFormatPrice();
 
   const [fieldValues, setFieldValues] = useState<FieldValues>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -293,7 +295,7 @@ export function CatalogFormPage() {
                   <div>
                     <p className="text-sm font-medium text-slate-600">{t('catalogs.calculatedPrice')}</p>
                     <p className="text-2xl font-bold text-brand-800">
-                      {formatPrice(previewPrice, isHebrew ? 'he' : 'en')}
+                      {formatPrice(previewPrice)}
                     </p>
                   </div>
                 </div>

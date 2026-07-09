@@ -216,16 +216,60 @@
     },
     "general": {
       "title": "Application",
+      "subtitle": "Customize how your pricing platform appears and displays monetary values",
+      "sections": {
+        "branding": "Branding",
+        "pricing": "Pricing & Display"
+      },
       "appName": "App name",
-      "appNameHint": "Displayed in the header and login page"
+      "appNamePlaceholder": "e.g. Maya Pricing",
+      "appNameHint": "Displayed in the sidebar, header, and login page",
+      "currency": "Currency",
+      "currencyHint": "Used for price display in catalogs and templates",
+      "preview": {
+        "title": "Live preview",
+        "header": "Navigation",
+        "priceLabel": "Sample catalog price",
+        "sampleName": "Maya Pricing",
+        "currencyNote": "Symbol {{symbol}} · {{code}}"
+      }
+    },
+    "currency": {
+      "usd": "US Dollar (USD)",
+      "ils": "Israeli Shekel (ILS)",
+      "inr": "Indian Rupee (INR)",
+      "eur": "Euro (EUR)",
+      "gbp": "British Pound (GBP)",
+      "cad": "Canadian Dollar (CAD)",
+      "aud": "Australian Dollar (AUD)"
     },
     "profile": {
-      "title": "Profile",
+      "title": "Your profile",
+      "subtitle": "Manage your personal details and account security",
+      "sections": {
+        "account": "Account details"
+      },
       "name": "Full name",
-      "email": "Email address"
+      "namePlaceholder": "e.g. Jane Doe",
+      "nameHint": "Shown in the sidebar welcome message",
+      "email": "Email address",
+      "emailPlaceholder": "you@company.com",
+      "emailHint": "Used for sign-in and account notifications",
+      "roles": {
+        "admin": "Administrator",
+        "user": "User"
+      },
+      "preview": {
+        "title": "Account preview",
+        "nameLabel": "Display name",
+        "emailLabel": "Email",
+        "roleLabel": "Role"
+      }
     },
     "password": {
       "title": "Change password",
+      "subtitle": "Keep your account secure",
+      "hint": "Use at least 6 characters. You will stay signed in after updating.",
       "current": "Current password",
       "new": "New password",
       "confirm": "Confirm new password",

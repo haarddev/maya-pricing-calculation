@@ -2,10 +2,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as settingsApi from '../../api/settings.api';
 import { queryKeys } from '../../lib/queryKeys';
 import type { AppSettings } from '../../types/settings.types';
+import { DEFAULT_CURRENCY } from '../../utils/currency';
 import { showError } from '../../utils/toast';
 
 const DEFAULT_SETTINGS: AppSettings = {
   appName: 'Maya Pricing',
+  currency: DEFAULT_CURRENCY,
   jwtExpiresIn: '7d',
   loginAttemptLimit: 5,
   lockoutDurationMinutes: 15,
@@ -47,7 +49,10 @@ export function useUpdateSettings() {
     onSuccess: (data) => {
       localStorage.setItem('appSettings', JSON.stringify(data));
       queryClient.setQueryData(queryKeys.settings.all, data);
-      queryClient.setQueryData(queryKeys.settings.public, { appName: data.appName });
+      queryClient.setQueryData(queryKeys.settings.public, {
+        appName: data.appName,
+        currency: data.currency,
+      });
     },
     onError: () => showError(),
   });

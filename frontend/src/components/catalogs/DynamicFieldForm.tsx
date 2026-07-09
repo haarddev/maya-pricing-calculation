@@ -1,4 +1,8 @@
 import type { TemplateField } from '../../types/template.types';
+import { useTranslation } from 'react-i18next';
+import { useAppSettings } from '../../context/SettingsContext';
+import { getCurrencySymbol, isPriceFieldKey } from '../../utils/currency';
+import { getAppLocale } from '../../utils/formatDate';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 
@@ -17,6 +21,10 @@ export function DynamicFieldForm({
   onChange,
   errors = {},
 }: DynamicFieldFormProps) {
+  const { i18n } = useTranslation();
+  const { currency } = useAppSettings();
+  const locale = getAppLocale(i18n.language);
+
   if (fields.length === 0) {
     return null;
   }
@@ -25,6 +33,10 @@ export function DynamicFieldForm({
     <div className="grid gap-4 sm:grid-cols-2">
       {fields.map((field) => {
         const label = isHebrew ? field.labelHe : field.labelEn;
+        const displayLabel =
+          field.fieldType === 'NUMBER' && isPriceFieldKey(field.fieldKey)
+            ? `${label} (${getCurrencySymbol(currency, locale === 'he' ? 'he-IL' : 'en-US')})`
+            : label;
         const value = values[field.fieldKey] ?? '';
         const error = errors[field.fieldKey];
 
@@ -33,7 +45,7 @@ export function DynamicFieldForm({
           return (
             <Select
               key={field.id}
-              label={label}
+              label={displayLabel}
               value={String(value)}
               onChange={(e) => onChange(field.fieldKey, e.target.value)}
               error={error}
@@ -57,7 +69,7 @@ export function DynamicFieldForm({
                 onChange={(e) => onChange(field.fieldKey, e.target.checked)}
                 className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
               />
-              {label}
+              {displayLabel}
             </label>
           );
         }
@@ -74,7 +86,7 @@ export function DynamicFieldForm({
         return (
           <Input
             key={field.id}
-            label={label}
+            label={displayLabel}
             type={inputType}
             value={String(value)}
             onChange={(e) =>

@@ -16,8 +16,11 @@ export type ManagedUser = User & {
   updatedAt?: string;
 };
 
+import type { CurrencyCode } from '../utils/currency';
+
 export type AppSettings = {
   appName: string;
+  currency: CurrencyCode;
   jwtExpiresIn: string;
   loginAttemptLimit: number;
   lockoutDurationMinutes: number;
@@ -27,6 +30,7 @@ export type AppSettings = {
 
 export type PublicSettings = {
   appName: string;
+  currency: CurrencyCode;
 };
 
 export type ApiResponse<T> = {

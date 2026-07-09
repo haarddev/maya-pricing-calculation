@@ -1,9 +1,10 @@
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
-import { AppError } from '../utils/errors.js';
+import { SUPPORTED_CURRENCIES } from '../utils/currency.js';
 
 const updateSettingsSchema = z.object({
   appName: z.string().min(1).max(100).optional(),
+  currency: z.enum([...SUPPORTED_CURRENCIES] as [string, ...string[]]).optional(),
   jwtExpiresIn: z.string().min(1).max(20).optional(),
   loginAttemptLimit: z.number().int().min(1).max(20).optional(),
   lockoutDurationMinutes: z.number().int().min(1).max(1440).optional(),
@@ -12,6 +13,7 @@ const updateSettingsSchema = z.object({
 
 export type AppSettingsData = {
   appName: string;
+  currency: string;
   jwtExpiresIn: string;
   loginAttemptLimit: number;
   lockoutDurationMinutes: number;
@@ -35,7 +37,7 @@ export async function getSettings(): Promise<AppSettingsData> {
 
 export async function getPublicSettings() {
   const settings = await ensureSettings();
-  return { appName: settings.appName };
+  return { appName: settings.appName, currency: settings.currency };
 }
 
 export async function updateSettings(input: unknown): Promise<AppSettingsData> {
@@ -49,6 +51,7 @@ export async function updateSettings(input: unknown): Promise<AppSettingsData> {
 
 function toSettingsData(settings: {
   appName: string;
+  currency: string;
   jwtExpiresIn: string;
   loginAttemptLimit: number;
   lockoutDurationMinutes: number;
@@ -57,6 +60,7 @@ function toSettingsData(settings: {
 }): AppSettingsData {
   return {
     appName: settings.appName,
+    currency: settings.currency,
     jwtExpiresIn: settings.jwtExpiresIn,
     loginAttemptLimit: settings.loginAttemptLimit,
     lockoutDurationMinutes: settings.lockoutDurationMinutes,

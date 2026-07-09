@@ -216,16 +216,60 @@
     },
     "general": {
       "title": "אפליקציה",
+      "subtitle": "התאימו את מראה מערכת התמחור ואת אופן הצגת ערכים כספיים",
+      "sections": {
+        "branding": "מיתוג",
+        "pricing": "תמחור ותצוגה"
+      },
       "appName": "שם האפליקציה",
-      "appNameHint": "מוצג בכותרת ובמסך ההתחברות"
+      "appNamePlaceholder": "לדוגמה Maya Pricing",
+      "appNameHint": "מוצג בסרגל הצד, בכותרת ובמסך ההתחברות",
+      "currency": "מטבע",
+      "currencyHint": "משמש להצגת מחירים בקטלוגים ובתבניות",
+      "preview": {
+        "title": "תצוגה מקדימה",
+        "header": "ניווט",
+        "priceLabel": "מחיר קטלוג לדוגמה",
+        "sampleName": "Maya Pricing",
+        "currencyNote": "סמל {{symbol}} · {{code}}"
+      }
+    },
+    "currency": {
+      "usd": "דולר אמריקאי (USD)",
+      "ils": "שקל חדש (ILS)",
+      "inr": "רופי הודי (INR)",
+      "eur": "אירו (EUR)",
+      "gbp": "לירה שטרלינג (GBP)",
+      "cad": "דולר קנדי (CAD)",
+      "aud": "דולר אוסטרלי (AUD)"
     },
     "profile": {
-      "title": "פרופיל",
+      "title": "הפרופיל שלך",
+      "subtitle": "נהלו את הפרטים האישיים ואת אבטחת החשבון",
+      "sections": {
+        "account": "פרטי חשבון"
+      },
       "name": "שם מלא",
-      "email": "כתובת אימייל"
+      "namePlaceholder": "לדוגמה יעל כהן",
+      "nameHint": "מוצג בהודעת ברוכים הבאים בסרגל הצד",
+      "email": "כתובת אימייל",
+      "emailPlaceholder": "you@company.com",
+      "emailHint": "משמש להתחברות והתראות חשבון",
+      "roles": {
+        "admin": "מנהל מערכת",
+        "user": "משתמש"
+      },
+      "preview": {
+        "title": "תצוגת חשבון",
+        "nameLabel": "שם תצוגה",
+        "emailLabel": "אימייל",
+        "roleLabel": "תפקיד"
+      }
     },
     "password": {
       "title": "שינוי סיסמה",
+      "subtitle": "שמרו על אבטחת החשבון",
+      "hint": "השתמשו בלפחות 6 תווים. תישארו מחוברים לאחר העדכון.",
       "current": "סיסמה נוכחית",
       "new": "סיסמה חדשה",
       "confirm": "אימות סיסמה חדשה",

@@ -6,18 +6,19 @@ import { useTranslation } from 'react-i18next';
 import { Settings } from 'lucide-react';
 import { UserManagement } from '../components/settings/UserManagement';
 import { SecuritySettings } from '../components/settings/SecuritySettings';
-import { Button } from '../components/ui/Button';
+import { GeneralSettings } from '../components/settings/GeneralSettings';
+import { ProfileSettings } from '../components/settings/ProfileSettings';
 import { Card } from '../components/ui/Card';
 import { PageBadge } from '../components/ui/PageBadge';
 import { PageHeader } from '../components/ui/PageHeader';
 import { SectionCard } from '../components/ui/SectionCard';
 import { TabNav } from '../components/ui/TabNav';
-import { Input } from '../components/ui/Input';
 import { PageLoader } from '../components/ui/Spinner';
 import { useAuth } from '../context/AuthContext';
 import { useAppSettings } from '../context/SettingsContext';
 import { useChangePassword, useUpdateProfile } from '../hooks/queries/auth';
 import { showError, showSuccess } from '../utils/toast';
+import type { CurrencyCode } from '../utils/currency';
 
 const profileSchema = z.object({
   name: z.string().min(1),
@@ -53,6 +54,7 @@ export function SettingsPage() {
   const changePassword = useChangePassword();
 
   const [appName, setAppName] = useState('');
+  const [currency, setCurrency] = useState<CurrencyCode>('ILS');
   const [jwtExpiresIn, setJwtExpiresIn] = useState('7d');
   const [loginAttemptLimit, setLoginAttemptLimit] = useState(5);
   const [lockoutDurationMinutes, setLockoutDurationMinutes] = useState(15);
@@ -71,6 +73,7 @@ export function SettingsPage() {
   useEffect(() => {
     if (!settings) return;
     setAppName(settings.appName);
+    setCurrency(settings.currency);
     setJwtExpiresIn(settings.jwtExpiresIn);
     setLoginAttemptLimit(settings.loginAttemptLimit);
     setLockoutDurationMinutes(settings.lockoutDurationMinutes);
@@ -98,7 +101,7 @@ export function SettingsPage() {
   const saveGeneral = async () => {
     setSavingGeneral(true);
     try {
-      await updateAppSettings({ appName });
+      await updateAppSettings({ appName, currency });
       showSuccess('settings.toast.generalSaved');
     } catch {
       showError();
@@ -171,69 +174,27 @@ export function SettingsPage() {
             <PageLoader />
           </Card>
         ) : (
-        <SectionCard title={t('settings.general.title')}>
-          <div className="max-w-xl space-y-4">
-            <Input
-              label={t('settings.general.appName')}
-              value={appName}
-              onChange={(e) => setAppName(e.target.value)}
-            />
-            <p className="text-sm text-slate-500">{t('settings.general.appNameHint')}</p>
-            <Button onClick={() => void saveGeneral()} loading={savingGeneral}>
-              {t('settings.save')}
-            </Button>
-          </div>
-        </SectionCard>
+          <GeneralSettings
+            appName={appName}
+            currency={currency}
+            saving={savingGeneral}
+            onAppNameChange={setAppName}
+            onCurrencyChange={setCurrency}
+            onSave={() => void saveGeneral()}
+          />
         )
       )}
 
       {tab === 'profile' && (
-        <div className="grid gap-6 lg:grid-cols-2">
-          <SectionCard title={t('settings.profile.title')}>
-            <form onSubmit={profileForm.handleSubmit(saveProfile)} className="space-y-4">
-              <Input
-                {...profileForm.register('name')}
-                label={t('settings.profile.name')}
-                error={profileForm.formState.errors.name?.message}
-              />
-              <Input
-                {...profileForm.register('email')}
-                label={t('settings.profile.email')}
-                type="email"
-                error={profileForm.formState.errors.email?.message}
-              />
-              <Button type="submit" loading={updateProfile.isPending}>
-                {t('settings.save')}
-              </Button>
-            </form>
-          </SectionCard>
-
-          <SectionCard title={t('settings.password.title')}>
-            <form onSubmit={passwordForm.handleSubmit(savePassword)} className="space-y-4">
-              <Input
-                {...passwordForm.register('currentPassword')}
-                label={t('settings.password.current')}
-                type="password"
-                error={passwordForm.formState.errors.currentPassword?.message}
-              />
-              <Input
-                {...passwordForm.register('newPassword')}
-                label={t('settings.password.new')}
-                type="password"
-                error={passwordForm.formState.errors.newPassword?.message}
-              />
-              <Input
-                {...passwordForm.register('confirmPassword')}
-                label={t('settings.password.confirm')}
-                type="password"
-                error={passwordForm.formState.errors.confirmPassword?.message}
-              />
-              <Button type="submit" loading={changePassword.isPending}>
-                {t('settings.password.change')}
-              </Button>
-            </form>
-          </SectionCard>
-        </div>
+        <ProfileSettings
+          user={user}
+          profileForm={profileForm}
+          passwordForm={passwordForm}
+          savingProfile={updateProfile.isPending}
+          savingPassword={changePassword.isPending}
+          onSaveProfile={saveProfile}
+          onSavePassword={savePassword}
+        />
       )}
 
       {tab === 'security' && isAdmin && (

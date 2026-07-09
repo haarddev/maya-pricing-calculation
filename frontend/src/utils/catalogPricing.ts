@@ -51,11 +51,20 @@ export function calculateCatalogPrice(
   }
 }
 
-export function formatPrice(value: number | null, locale: string) {
+export function formatPrice(value: number | null, locale: string, currency = 'ILS') {
   if (value === null) return '—';
-  return new Intl.NumberFormat(locale === 'he' ? 'he-IL' : 'en-US', {
-    style: 'currency',
-    currency: 'ILS',
-    maximumFractionDigits: 2,
-  }).format(value);
+  const localeTag = locale === 'he' ? 'he-IL' : 'en-US';
+  try {
+    return new Intl.NumberFormat(localeTag, {
+      style: 'currency',
+      currency,
+      maximumFractionDigits: 2,
+    }).format(value);
+  } catch {
+    return new Intl.NumberFormat(localeTag, {
+      style: 'currency',
+      currency: 'ILS',
+      maximumFractionDigits: 2,
+    }).format(value);
+  }
 }

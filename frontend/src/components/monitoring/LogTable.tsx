@@ -3,7 +3,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { LogCategory, SystemLog } from '../../types/log.types';
-import { formatPrice } from '../../utils/catalogPricing';
+import { useFormatPrice } from '../../hooks/useFormatPrice';
 import { formatDateTime, getAppLocale } from '../../utils/formatDate';
 import { Card } from '../ui/Card';
 import { EmptyState } from '../ui/EmptyState';
@@ -39,6 +39,7 @@ export function LogTable({ logs, loading }: LogTableProps) {
   const { t, i18n } = useTranslation();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const locale = getAppLocale(i18n.language);
+  const formatPriceValue = useFormatPrice();
 
   const toggleRow = useCallback((log: SystemLog) => {
     setExpandedId((current) => (current === log.id ? null : log.id));
@@ -49,7 +50,7 @@ export function LogTable({ logs, loading }: LogTableProps) {
   const priceOf = (log: SystemLog) => {
     if (log.calculatedPrice === null || log.calculatedPrice === undefined) return '—';
     const num = Number(log.calculatedPrice);
-    return Number.isNaN(num) ? '—' : formatPrice(num, locale);
+    return Number.isNaN(num) ? '—' : formatPriceValue(num);
   };
 
   const renderDetailPanel = (log: SystemLog) => (
@@ -131,7 +132,7 @@ export function LogTable({ logs, loading }: LogTableProps) {
         },
       }),
     ],
-    [expandedId, locale, priceOf, t],
+    [expandedId, formatPriceValue, locale, priceOf, t],
   );
 
   if (loading) {

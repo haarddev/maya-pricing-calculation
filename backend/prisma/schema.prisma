@@ -151,6 +151,7 @@ model SystemLog {
 model AppSettings {
   id                         String   @id @default("default")
   appName                    String   @default("Maya Pricing") @map("app_name")
+  currency                   String   @default("ILS")
   jwtExpiresIn               String   @default("7d") @map("jwt_expires_in")
   loginAttemptLimit          Int      @default(5) @map("login_attempt_limit")
   lockoutDurationMinutes     Int      @default(15) @map("lockout_duration_minutes")
