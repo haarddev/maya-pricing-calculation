@@ -7,12 +7,18 @@ export type Catalog = {
   name: string;
   description: string;
   status: CatalogStatus;
+  customerId: string | null;
   templateId: string;
   fieldValues: FieldValues;
   calculatedPrice: string | number | null;
   createdById: string;
   createdAt: string;
   updatedAt: string;
+  customer?: {
+    id: string;
+    name: string;
+    status: string;
+  } | null;
   template?: {
     id: string;
     name: string;
@@ -31,6 +37,7 @@ export type CreateCatalogInput = {
   name: string;
   description?: string;
   status?: CatalogStatus;
+  customerId: string;
   templateId: string;
   fieldValues: FieldValues;
 };
@@ -39,6 +46,7 @@ export type UpdateCatalogInput = {
   name?: string;
   description?: string;
   status?: CatalogStatus;
+  customerId?: string;
   fieldValues?: FieldValues;
 };
 

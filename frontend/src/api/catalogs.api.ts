@@ -14,6 +14,7 @@ import { apiClient } from './client';
 export async function listCatalogs(filters?: {
   status?: CatalogStatus;
   templateId?: string;
+  customerId?: string;
   search?: string;
 }) {
   const { data } = await apiClient.get<ApiResponse<Catalog[]>>('/api/catalogs', { params: filters });

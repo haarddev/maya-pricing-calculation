@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import {
   BookOpen,
+  Calculator,
   LayoutGrid,
   LogOut,
   Route,
   Activity,
   Settings,
   Menu,
+  Users,
   X,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -32,8 +34,10 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
+  { to: '/customers', labelKey: 'nav.customers', icon: Users },
   { to: '/templates', labelKey: 'nav.templates', icon: LayoutGrid },
   { to: '/catalogs', labelKey: 'nav.catalogs', icon: BookOpen },
+  { to: '/pricing-check', labelKey: 'nav.pricingCheck', icon: Calculator },
   { to: '/monitoring', labelKey: 'nav.monitoring', icon: Activity },
   { to: '/settings', labelKey: 'nav.settings', icon: Settings },
 ];

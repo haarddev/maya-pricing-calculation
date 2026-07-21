@@ -47,6 +47,11 @@ export function CatalogTable({ catalogs, onDelete }: CatalogTableProps) {
         header: () => t('catalogs.name'),
         cell: (info) => <span className="font-medium text-slate-900">{info.getValue()}</span>,
       }),
+      columnHelper.accessor((row) => row.customer?.name ?? '—', {
+        id: 'customer',
+        header: () => t('catalogs.customer'),
+        cell: (info) => <span className="text-slate-600">{info.getValue()}</span>,
+      }),
       columnHelper.accessor((row) => row.template?.name ?? '—', {
         id: 'template',
         header: () => t('catalogs.template'),
@@ -125,7 +130,7 @@ export function CatalogTable({ catalogs, onDelete }: CatalogTableProps) {
         <MobileEntityCard
           key={catalog.id}
           title={catalog.name}
-          subtitle={catalog.template?.name}
+          subtitle={catalog.customer?.name ?? catalog.template?.name}
           badge={
             <StatusBadge
               label={t(`catalogStatus.${catalog.status}`)}
@@ -133,6 +138,10 @@ export function CatalogTable({ catalogs, onDelete }: CatalogTableProps) {
             />
           }
           stats={[
+            {
+              label: t('catalogs.customer'),
+              value: catalog.customer?.name ?? '—',
+            },
             {
               label: t('catalogs.calculatedPrice'),
               value: <span className="font-semibold text-brand-700">{priceOf(catalog)}</span>,

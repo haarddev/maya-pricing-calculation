@@ -1,4 +1,5 @@
 import type { CatalogStatus } from '../types/catalog.types';
+import type { CustomerStatus } from '../types/customer.types';
 import type { LogCategory } from '../types/log.types';
 import type { PricingMethod, TemplateStatus } from '../types/template.types';
 
@@ -9,6 +10,13 @@ export const queryKeys = {
   settings: {
     all: ['settings'] as const,
     public: ['settings', 'public'] as const,
+  },
+  customers: {
+    all: ['customers'] as const,
+    lists: () => [...queryKeys.customers.all, 'list'] as const,
+    list: (filters: { search?: string; status?: CustomerStatus }) =>
+      [...queryKeys.customers.lists(), filters] as const,
+    detail: (id: string) => [...queryKeys.customers.all, id] as const,
   },
   templates: {
     all: ['templates'] as const,
@@ -27,6 +35,7 @@ export const queryKeys = {
       search?: string;
       status?: CatalogStatus;
       templateId?: string;
+      customerId?: string;
     }) => [...queryKeys.catalogs.lists(), filters] as const,
     templates: () => [...queryKeys.catalogs.all, 'templates'] as const,
     detail: (id: string) => [...queryKeys.catalogs.all, id] as const,

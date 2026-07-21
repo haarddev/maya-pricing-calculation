@@ -23,6 +23,7 @@ import {
   useTemplateForCatalog,
   useUpdateCatalog,
 } from '../hooks/queries/catalogs';
+import { useCustomers } from '../hooks/queries/customers';
 import { showError } from '../utils/toast';
 import type { Catalog, FieldValues } from '../types/catalog.types';
 import type { PricingMethod, Template, TemplateField } from '../types/template.types';
@@ -36,6 +37,7 @@ const metaSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
   status: z.enum(['ACTIVE', 'DISABLED', 'DRAFT']),
+  customerId: z.string().min(1),
   templateId: z.string().min(1),
 });
 
@@ -54,6 +56,7 @@ export function CatalogFormPage() {
   const [savedCatalog, setSavedCatalog] = useState<Catalog | null>(null);
 
   const { data: templates = [], isLoading: templatesLoading } = useCatalogTemplates();
+  const { data: customers = [], isLoading: customersLoading } = useCustomers({ status: 'ACTIVE' });
   const { data: catalog, isLoading: catalogLoading } = useCatalog(id);
   const createCatalog = useCreateCatalog();
   const updateCatalog = useUpdateCatalog(id ?? '');
@@ -71,6 +74,7 @@ export function CatalogFormPage() {
       name: '',
       description: '',
       status: 'DRAFT',
+      customerId: '',
       templateId: '',
     },
   });
@@ -94,6 +98,7 @@ export function CatalogFormPage() {
       name: catalog.name,
       description: catalog.description,
       status: catalog.status,
+      customerId: catalog.customerId ?? '',
       templateId: catalog.templateId,
     });
     setFieldValues(catalog.fieldValues);
@@ -157,6 +162,7 @@ export function CatalogFormPage() {
           name: data.name,
           description: data.description,
           status: data.status,
+          customerId: data.customerId,
           fieldValues,
         },
         { onSuccess: () => navigate('/catalogs') },
@@ -169,6 +175,7 @@ export function CatalogFormPage() {
         name: data.name,
         description: data.description,
         status: data.status,
+        customerId: data.customerId,
         templateId: data.templateId,
         fieldValues,
       },
@@ -178,6 +185,7 @@ export function CatalogFormPage() {
 
   const loading =
     templatesLoading ||
+    customersLoading ||
     (isEdit && catalogLoading) ||
     (Boolean(effectiveTemplateId) && templateLoading && !selectedTemplate);
 
@@ -231,6 +239,37 @@ export function CatalogFormPage() {
                     value: status,
                     label: t(`catalogStatus.${status}`),
                   }))}
+                />
+              )}
+            />
+            <Controller
+              name="customerId"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  label={t('catalogs.customer')}
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  error={errors.customerId?.message}
+                  options={[
+                    { value: '', label: t('catalogs.chooseCustomer') },
+                    ...customers.map((customer) => ({
+                      value: customer.id,
+                      label: customer.name,
+                    })),
+                    ...(isEdit &&
+                    catalog?.customer &&
+                    !customers.some((c) => c.id === catalog.customerId)
+                      ? [
+                          {
+                            value: catalog.customer.id,
+                            label: catalog.customer.name,
+                          },
+                        ]
+                      : []),
+                  ]}
                 />
               )}
             />

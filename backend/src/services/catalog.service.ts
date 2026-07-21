@@ -2,6 +2,7 @@ import { TemplateStatus, Prisma, CatalogStatus } from '@prisma/client';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
 import { logPricingResult } from './log.service.js';
+import { requireActiveCustomer } from './customer.service.js';
 import { shouldRequireActiveTemplate } from './settings.service.js';
 import { AppError } from '../utils/errors.js';
 import {
@@ -15,6 +16,7 @@ const createCatalogSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
   status: z.nativeEnum(CatalogStatus).optional(),
+  customerId: z.string().uuid(),
   templateId: z.string().uuid(),
   fieldValues: z.record(z.unknown()),
 });
@@ -23,10 +25,12 @@ const updateCatalogSchema = z.object({
   name: z.string().min(1).optional(),
   description: z.string().optional(),
   status: z.nativeEnum(CatalogStatus).optional(),
+  customerId: z.string().uuid().optional(),
   fieldValues: z.record(z.unknown()).optional(),
 });
 
 const catalogInclude = {
+  customer: { select: { id: true, name: true, status: true } },
   template: {
     select: {
       id: true,
@@ -60,16 +64,19 @@ async function getTemplateForCatalog(templateId: string) {
 export async function listCatalogs(filters: {
   status?: CatalogStatus;
   templateId?: string;
+  customerId?: string;
   search?: string;
 }) {
   const where: {
     status?: CatalogStatus;
     templateId?: string;
+    customerId?: string;
     name?: { contains: string; mode: 'insensitive' };
   } = {};
 
   if (filters.status) where.status = filters.status;
   if (filters.templateId) where.templateId = filters.templateId;
+  if (filters.customerId) where.customerId = filters.customerId;
   if (filters.search) where.name = { contains: filters.search, mode: 'insensitive' };
 
   return prisma.catalog.findMany({
@@ -94,6 +101,7 @@ export async function getCatalogById(id: string) {
 
 export async function createCatalog(input: unknown, userId: string) {
   const data = createCatalogSchema.parse(input);
+  await requireActiveCustomer(data.customerId);
   const template = await getTemplateForCatalog(data.templateId);
 
   const fieldValues = normalizeFieldValues(template.fields, data.fieldValues);
@@ -116,6 +124,7 @@ export async function createCatalog(input: unknown, userId: string) {
       name: data.name,
       description: data.description ?? '',
       status: data.status ?? CatalogStatus.DRAFT,
+      customerId: data.customerId,
       templateId: data.templateId,
       fieldValues: fieldValues as Prisma.InputJsonValue,
       calculatedPrice,
@@ -128,6 +137,10 @@ export async function createCatalog(input: unknown, userId: string) {
 export async function updateCatalog(id: string, input: unknown) {
   const data = updateCatalogSchema.parse(input);
   const existing = await getCatalogById(id);
+
+  if (data.customerId) {
+    await requireActiveCustomer(data.customerId);
+  }
 
   let fieldValues = existing.fieldValues as FieldValues;
   let calculatedPrice: number | null = existing.calculatedPrice
@@ -156,6 +169,7 @@ export async function updateCatalog(id: string, input: unknown) {
       name: data.name,
       description: data.description,
       status: data.status,
+      customerId: data.customerId,
       fieldValues: fieldValues as Prisma.InputJsonValue,
       calculatedPrice,
     },

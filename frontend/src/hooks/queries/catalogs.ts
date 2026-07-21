@@ -9,6 +9,7 @@ export function useCatalogs(filters: {
   search?: string;
   status?: CatalogStatus;
   templateId?: string;
+  customerId?: string;
 }) {
   return useQuery({
     queryKey: queryKeys.catalogs.list(filters),

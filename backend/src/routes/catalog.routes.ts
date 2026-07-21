@@ -21,9 +21,15 @@ catalogRouter.get('/', async (req, res) => {
   try {
     const status = req.query.status as CatalogStatus | undefined;
     const templateId = req.query.templateId as string | undefined;
+    const customerId = req.query.customerId as string | undefined;
     const search = req.query.search as string | undefined;
 
-    const catalogs = await catalogService.listCatalogs({ status, templateId, search });
+    const catalogs = await catalogService.listCatalogs({
+      status,
+      templateId,
+      customerId,
+      search,
+    });
     res.json({ success: true, data: catalogs });
   } catch (error) {
     sendError(res, error);

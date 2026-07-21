@@ -1,10 +1,33 @@
 import bcrypt from 'bcryptjs';
 import { PrismaClient, TemplateStatus, UserRole } from '@prisma/client';
+import {
+  DEMO_CUSTOMER_NAME,
+  KIVUNIM_CUSTOMER_NAME,
+} from '../src/constants/customers.js';
 import { seedDummyLogsIfNeeded } from '../src/services/log.service.js';
 import { ensureSettings } from '../src/services/settings.service.js';
 import { seedClientTemplates } from './seed-client-templates.js';
+import { seedPriceList } from './seed-price-list.js';
+import { seedSyntheticPriceLists } from './seed-synthetic-price-lists.js';
 
 const prisma = new PrismaClient();
+
+async function ensureCustomer(
+  name: string,
+  description: string,
+  adminId: string,
+) {
+  const existing = await prisma.customer.findFirst({ where: { name } });
+  if (existing) return existing;
+  return prisma.customer.create({
+    data: {
+      name,
+      description,
+      status: 'ACTIVE',
+      createdById: adminId,
+    },
+  });
+}
 
 async function main() {
   const passwordHash = await bcrypt.hash('Admin123!', 10);
@@ -21,6 +44,18 @@ async function main() {
   });
 
   await ensureSettings();
+
+  const kivunimCustomer = await ensureCustomer(
+    KIVUNIM_CUSTOMER_NAME,
+    'Real client price lists from the Kivunim Excel (dedicated trips + hops).',
+    admin.id,
+  );
+  const demoCustomer = await ensureCustomer(
+    DEMO_CUSTOMER_NAME,
+    'Demo customer owning the synthetic price lists for all other pricing methods.',
+    admin.id,
+  );
+  console.log(`Customers ready: "${kivunimCustomer.name}", "${demoCustomer.name}"`);
 
   const existingTemplates = await prisma.template.count();
   if (existingTemplates === 0) {
@@ -94,28 +129,29 @@ async function main() {
     console.log(`Created ${clientTemplatesCreated} client templates`);
   }
 
-  const existingCatalogs = await prisma.catalog.count();
-  if (existingCatalogs === 0) {
-    const distanceTemplate = await prisma.template.findFirst({
-      where: { pricingMethod: 'PRICE_BY_DISTANCE' },
-    });
+  const priceListCatalogsCreated = await seedPriceList(
+    prisma,
+    admin.id,
+    kivunimCustomer.id,
+  );
+  if (priceListCatalogsCreated > 0) {
+    console.log(`Created ${priceListCatalogsCreated} Kivunim price list catalogs`);
+  }
 
-    if (distanceTemplate) {
-      await prisma.catalog.create({
-        data: {
-          name: 'Line 5 - Tel Aviv North',
-          description: 'Distance pricing for route line 5',
-          status: 'ACTIVE',
-          templateId: distanceTemplate.id,
-          fieldValues: {
-            route_number: '5',
-            price_per_km: 4.5,
-          },
-          calculatedPrice: 4.5,
-          createdById: admin.id,
-        },
-      });
-    }
+  const synthetic = await seedSyntheticPriceLists(prisma, admin.id, demoCustomer.id);
+  if (synthetic.templatesCreated > 0 || synthetic.catalogsCreated > 0) {
+    console.log(
+      `Created ${synthetic.templatesCreated} synthetic templates and ${synthetic.catalogsCreated} catalogs`,
+    );
+  }
+
+  // Assign any leftover orphan catalogs to the demo customer
+  const orphans = await prisma.catalog.updateMany({
+    where: { customerId: null },
+    data: { customerId: demoCustomer.id },
+  });
+  if (orphans.count > 0) {
+    console.log(`Assigned ${orphans.count} orphan catalogs to demo customer`);
   }
 
   console.log('Seed completed');

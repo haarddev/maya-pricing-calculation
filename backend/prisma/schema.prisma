@@ -59,6 +59,11 @@ enum UserStatus {
   DISABLED
 }
 
+enum CustomerStatus {
+  ACTIVE
+  DISABLED
+}
+
 model User {
   id            String     @id @default(uuid())
   email         String     @unique
@@ -72,8 +77,25 @@ model User {
   updatedAt     DateTime   @updatedAt @map("updated_at")
   templates     Template[]
   catalogs      Catalog[]
+  customers     Customer[]
 
   @@map("users")
+}
+
+/// Transport company's end customer — each has their own price lists (catalogs).
+/// End customers do not log into Maya; company employees manage them here.
+model Customer {
+  id          String         @id @default(uuid())
+  name        String
+  description String         @default("")
+  status      CustomerStatus @default(ACTIVE)
+  createdById String         @map("created_by_id")
+  createdBy   User           @relation(fields: [createdById], references: [id])
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+  catalogs    Catalog[]
+
+  @@map("customers")
 }
 
 model Template {
@@ -114,6 +136,8 @@ model Catalog {
   name            String
   description     String        @default("")
   status          CatalogStatus @default(DRAFT)
+  customerId      String?       @map("customer_id")
+  customer        Customer?     @relation(fields: [customerId], references: [id])
   templateId      String        @map("template_id")
   template        Template      @relation(fields: [templateId], references: [id])
   fieldValues     Json          @map("field_values")
@@ -123,6 +147,7 @@ model Catalog {
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
 
+  @@index([customerId])
   @@map("catalogs")
 }
 

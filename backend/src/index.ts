@@ -7,7 +7,9 @@ import { requestLogger } from './middleware/requestLogger.js';
 import type { AuthRequest } from './middleware/auth.js';
 import { authRouter } from './routes/auth.routes.js';
 import { catalogRouter } from './routes/catalog.routes.js';
+import { customerRouter } from './routes/customer.routes.js';
 import { logRouter } from './routes/log.routes.js';
+import { pricingRouter } from './routes/pricing.routes.js';
 import { settingsRouter } from './routes/settings.routes.js';
 import { templateRouter } from './routes/template.routes.js';
 import { userRouter } from './routes/user.routes.js';
@@ -28,7 +30,9 @@ app.get('/health', (_req, res) => {
 
 app.use('/api/auth', authRouter);
 app.use('/api/templates', templateRouter);
+app.use('/api/customers', customerRouter);
 app.use('/api/catalogs', catalogRouter);
+app.use('/api/pricing', pricingRouter);
 app.use('/api/logs', logRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/users', userRouter);
