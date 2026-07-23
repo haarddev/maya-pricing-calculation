@@ -23,6 +23,10 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('7d'),
   PORT: z.coerce.number().default(4000),
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
+  ITURAN_BASE_URL: z.string().url().default('https://api.ituran.com/api/v1'),
+  ITURAN_USERNAME: z.string().optional(),
+  ITURAN_PASSWORD: z.string().optional(),
+  ITURAN_EXCEL_PATH: z.string().optional(),
 });
 
 const databaseUrl = buildDatabaseUrl();

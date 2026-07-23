@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Calculator, PlayCircle } from 'lucide-react';
+import { Calculator, PlayCircle, SatelliteDish } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import * as ituranApi from '../api/ituran.api';
 import * as pricingApi from '../api/pricing.api';
 import { Alert } from '../components/ui/Alert';
 import { Button } from '../components/ui/Button';
@@ -20,11 +21,9 @@ import type {
   ReportTripStatus,
   ReportValidationRow,
 } from '../types/pricing.types';
+import type { IturanVerifiedTrip } from '../types/ituran.types';
 
-const VEHICLES = ['Bus', 'Minibus', 'Van', 'Sedan'];
-const TIERS = ['Up to 2', 'Up to 4', 'Larger group'];
-
-type MethodKey = PricingMethod | 'KIVUNIM';
+type MethodKey = 'KIVUNIM' | 'PRICE_BY_KM_AND_HOURS';
 
 type MethodFormConfig = {
   key: MethodKey;
@@ -51,71 +50,11 @@ const METHOD_FORMS: MethodFormConfig[] = [
     ],
   },
   {
-    key: 'PRICE_BY_DESTINATION',
-    label: 'Price by Destination',
-    apiMethod: 'PRICE_BY_DESTINATION',
-    fields: [
-      { name: 'destination', label: 'Destination', type: 'select', required: true },
-      { name: 'vehicle_type', label: 'Vehicle Type', type: 'select', options: VEHICLES, required: true },
-    ],
-  },
-  {
-    key: 'PRICE_BY_AREA',
-    label: 'Price by Area',
-    apiMethod: 'PRICE_BY_AREA',
-    fields: [
-      { name: 'area_name', label: 'Area', type: 'select', required: true },
-      { name: 'vehicle_type', label: 'Vehicle Type', type: 'select', options: VEHICLES, required: true },
-    ],
-  },
-  {
-    key: 'PRICE_BY_PASSENGERS',
-    label: 'Price by Passengers',
-    apiMethod: 'PRICE_BY_PASSENGERS',
-    fields: [
-      { name: 'passenger_tier', label: 'Passenger Tier', type: 'select', options: TIERS, required: true },
-      { name: 'vehicle_type', label: 'Vehicle Type', type: 'select', options: VEHICLES, required: true },
-    ],
-  },
-  {
-    key: 'PRICE_BY_SKU',
-    label: 'Price by SKU',
-    apiMethod: 'PRICE_BY_SKU',
-    fields: [{ name: 'sku', label: 'SKU', type: 'select', required: true }],
-  },
-  {
-    key: 'PRICE_BY_HOURS',
-    label: 'Price by Hours',
-    apiMethod: 'PRICE_BY_HOURS',
-    fields: [
-      { name: 'vehicle_type', label: 'Vehicle Type', type: 'select', options: VEHICLES, required: true },
-      { name: 'hours', label: 'Hours', type: 'number', required: true },
-    ],
-  },
-  {
-    key: 'PRICE_BY_MINUTES',
-    label: 'Price by Minutes',
-    apiMethod: 'PRICE_BY_MINUTES',
-    fields: [
-      { name: 'vehicle_type', label: 'Vehicle Type', type: 'select', options: VEHICLES, required: true },
-      { name: 'minutes', label: 'Minutes', type: 'number', required: true },
-    ],
-  },
-  {
-    key: 'PRICE_BY_DISTANCE',
-    label: 'Price by Distance',
-    apiMethod: 'PRICE_BY_DISTANCE',
-    fields: [
-      { name: 'route_number', label: 'Route / Line Number', type: 'select', required: true },
-      { name: 'km', label: 'Kilometers', type: 'number', required: true },
-    ],
-  },
-  {
     key: 'PRICE_BY_KM_AND_HOURS',
-    label: 'Price by Km + Hours',
+    label: 'Km + Hours (MoD Masha — real client rates)',
     apiMethod: 'PRICE_BY_KM_AND_HOURS',
     fields: [
-      { name: 'vehicle_type', label: 'Vehicle Type', type: 'select', options: VEHICLES, required: true },
+      { name: 'vehicle_type', label: 'Vehicle Type', type: 'select', options: ['Bus', 'Minibus', 'Van'], required: true },
       { name: 'km', label: 'Kilometers', type: 'number', required: true },
       { name: 'hours', label: 'Hours', type: 'number', required: true },
     ],
@@ -163,6 +102,16 @@ export function PricingCheckPage() {
   });
   const [quantity, setQuantity] = useState('1');
   const [tripFilter, setTripFilter] = useState<'all' | ReportTripStatus>('all');
+  const [ituranForm, setIturanForm] = useState({
+    travel_code: '11486689',
+    date: '4/28/26',
+    start_time: '19:30',
+    driver_name: 'אנף שלום',
+    vehicle_number: '93134301',
+    billed_total: '265.92',
+    description: 'מחנה תה"ש-מש"א - נתניה ת. מרכזית (אגד)',
+    duration: '2:00:00',
+  });
 
   const methodConfig = METHOD_FORMS.find((m) => m.key === methodKey)!;
 
@@ -221,9 +170,16 @@ export function PricingCheckPage() {
     mutationFn: (method: MethodKey) =>
       pricingApi.validateReport(method === 'KIVUNIM' ? 'KIVUNIM' : method),
   });
+  const ituranVerify = useMutation({
+    mutationFn: ituranApi.verifyTrips,
+  });
 
   const setField = (name: string, value: string) => {
     setFormValues((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const setIturanField = (name: keyof typeof ituranForm, value: string) => {
+    setIturanForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleCustomerChange = (id: string) => {
@@ -273,6 +229,29 @@ export function PricingCheckPage() {
       quantity: quantity ? Number(quantity) : undefined,
     });
   };
+
+  const handleIturanVerify = () => {
+    const billed = ituranForm.billed_total.trim()
+      ? Number(ituranForm.billed_total)
+      : undefined;
+    ituranVerify.mutate({
+      customer_id: customerId || undefined,
+      trips: [
+        {
+          travel_code: ituranForm.travel_code.trim() || 'manual',
+          date: ituranForm.date.trim(),
+          start_time: ituranForm.start_time.trim() || undefined,
+          driver_name: ituranForm.driver_name.trim(),
+          vehicle_number: ituranForm.vehicle_number.trim(),
+          billed_total: Number.isFinite(billed) ? billed : undefined,
+          description: ituranForm.description.trim() || undefined,
+          duration: ituranForm.duration.trim() || undefined,
+        },
+      ],
+    });
+  };
+
+  const ituranResult: IturanVerifiedTrip | undefined = ituranVerify.data?.results[0];
 
   const reportData = report.data;
   const shownTrips: ReportValidationRow[] =
@@ -407,12 +386,161 @@ export function PricingCheckPage() {
         </div>
       </SectionCard>
 
-      <SectionCard
+      <SectionCard title={t('pricing.ituran.title')}>
+        <p className="mb-4 text-sm text-slate-500">{t('pricing.ituran.hint')}</p>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <Input
+            label={t('pricing.ituran.travelCode')}
+            value={ituranForm.travel_code}
+            onChange={(e) => setIturanField('travel_code', e.target.value)}
+          />
+          <Input
+            label={t('pricing.ituran.date')}
+            value={ituranForm.date}
+            onChange={(e) => setIturanField('date', e.target.value)}
+          />
+          <Input
+            label={t('pricing.ituran.startTime')}
+            type="time"
+            value={ituranForm.start_time}
+            onChange={(e) => setIturanField('start_time', e.target.value)}
+          />
+          <Input
+            label={t('pricing.ituran.driverName')}
+            value={ituranForm.driver_name}
+            onChange={(e) => setIturanField('driver_name', e.target.value)}
+          />
+          <Input
+            label={t('pricing.ituran.vehicleNumber')}
+            value={ituranForm.vehicle_number}
+            onChange={(e) => setIturanField('vehicle_number', e.target.value)}
+          />
+          <Input
+            label={t('pricing.ituran.billedTotal')}
+            type="number"
+            step="any"
+            value={ituranForm.billed_total}
+            onChange={(e) => setIturanField('billed_total', e.target.value)}
+          />
+          <Input
+            label={t('pricing.ituran.description')}
+            value={ituranForm.description}
+            onChange={(e) => setIturanField('description', e.target.value)}
+          />
+          <Input
+            label={t('pricing.ituran.duration')}
+            value={ituranForm.duration}
+            onChange={(e) => setIturanField('duration', e.target.value)}
+            placeholder="2:00:00"
+          />
+        </div>
+        <div className="mt-4">
+          <Button
+            onClick={handleIturanVerify}
+            loading={ituranVerify.isPending}
+            className="w-full sm:w-auto"
+          >
+            <SatelliteDish className="h-4 w-4" />
+            {t('pricing.ituran.verify')}
+          </Button>
+        </div>
+
+        <div className="mt-5 space-y-3">
+          {ituranVerify.isError && (
+            <Alert variant="error">{extractErrorMessage(ituranVerify.error)}</Alert>
+          )}
+          {ituranResult && !ituranResult.matched && (
+            <Alert variant="error">
+              {t('pricing.ituran.noMatch')}
+              {ituranResult.match_error ? `: ${ituranResult.match_error}` : ''}
+            </Alert>
+          )}
+          {ituranResult?.matched && ituranResult.matched_trip && (
+            <Card className="!border-sky-200 !bg-sky-50/50">
+              <p className="text-sm font-semibold text-slate-800">{t('pricing.ituran.matched')}</p>
+              <div className="mt-2 grid gap-2 text-sm text-slate-600 sm:grid-cols-2 lg:grid-cols-3">
+                <p>
+                  {t('pricing.ituran.tripId')}: {ituranResult.matched_trip.trip_id}
+                </p>
+                <p>
+                  {t('pricing.ituran.ituranDriver')}: {ituranResult.matched_trip.driver_name ?? '—'}
+                </p>
+                <p>
+                  {t('pricing.ituran.km')}: {ituranResult.km}
+                </p>
+                <p>
+                  {t('pricing.ituran.idleMins')}: {ituranResult.matched_trip.idle_mins}
+                </p>
+                <p>
+                  {t('pricing.ituran.hours')}: {ituranResult.hours}
+                </p>
+                {ituranResult.billed_total != null && (
+                  <p>
+                    Excel: {formatPrice(ituranResult.billed_total)}
+                  </p>
+                )}
+              </div>
+              <p className="mt-4 text-sm font-semibold text-slate-800">{t('pricing.ituran.prices')}</p>
+              <div className="mt-2 space-y-4">
+                {(ituranResult.method_prices?.length
+                  ? ituranResult.method_prices
+                  : [
+                      {
+                        key: 'legacy',
+                        label: t('pricing.ituran.prices'),
+                        matched_billed: false,
+                        closest_delta: null,
+                        prices: ituranResult.prices,
+                      },
+                    ]
+                ).map((group) => (
+                  <div key={group.key}>
+                    <p className="mb-2 text-xs font-semibold text-slate-600">
+                      {group.label}
+                      {group.matched_billed ? (
+                        <span className="ms-2 text-emerald-600">{t('pricing.ituran.billedMatch')}</span>
+                      ) : group.closest_delta != null ? (
+                        <span className="ms-2 text-slate-400">
+                          {t('pricing.ituran.vsExcel')}: {formatPrice(group.closest_delta)}
+                        </span>
+                      ) : null}
+                    </p>
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      {group.prices.map((price) => (
+                        <Card key={`${group.key}-${price.vehicle_type}`} className="!p-3">
+                          <p className="text-xs font-medium text-slate-500">{price.vehicle_type}</p>
+                          {price.error && price.total_price == null ? (
+                            <p className="mt-1 text-xs text-slate-400">{t('pricing.ituran.noCatalog')}</p>
+                          ) : (
+                            <p className="mt-1 text-xl font-bold text-slate-900">
+                              {price.total_price != null ? formatPrice(price.total_price) : '—'}
+                            </p>
+                          )}
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {ituranResult.best_method && (
+                <p className="mt-3 text-sm text-sky-800">
+                  {t('pricing.ituran.bestMethod')}: {ituranResult.best_method.label}
+                  {ituranResult.best_method.closest_delta != null &&
+                    ` (Δ ${formatPrice(ituranResult.best_method.closest_delta)})`}
+                </p>
+              )}
+            </Card>
+          )}
+        </div>
+      </SectionCard>
+
+      {/* <SectionCard
         title={t('pricing.reportCheck')}
         actions={
           <Button
             onClick={() => report.mutate(methodKey)}
             loading={report.isPending}
+            disabled={methodKey !== 'KIVUNIM'}
             className="w-full sm:w-auto"
           >
             <PlayCircle className="h-4 w-4" />
@@ -421,7 +549,7 @@ export function PricingCheckPage() {
         }
       >
         <p className="text-sm text-slate-500">
-          {methodKey === 'KIVUNIM' ? t('pricing.reportCheckHint') : t('pricing.reportCheckHintSynthetic')}
+          {t('pricing.reportCheckHint')}
         </p>
 
         {report.isError && (
@@ -538,7 +666,7 @@ export function PricingCheckPage() {
             </div>
           </div>
         )}
-      </SectionCard>
+      </SectionCard> */}
     </div>
   );
 }

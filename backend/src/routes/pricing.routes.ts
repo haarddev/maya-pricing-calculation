@@ -5,8 +5,6 @@ import { authMiddleware, type AuthRequest } from '../middleware/auth.js';
 import {
   calculateTripPrice,
   listPricingMethods,
-  validateAllSyntheticReports,
-  validateMethodReport,
   validateMonthlyReport,
 } from '../services/pricing.service.js';
 import { sendError } from '../utils/errors.js';
@@ -39,35 +37,22 @@ pricingRouter.post('/calculate', async (req: AuthRequest, res) => {
   }
 });
 
+/** Kivunim May report validation only (real client data). */
 pricingRouter.get('/validate-report', async (req, res) => {
   try {
     const method = req.query.method as string | undefined;
-
-    if (!method || method === 'KIVUNIM' || method === PricingMethod.PRICE_BY_ROUTE) {
-      // Default: original Kivunim May report (PRICE_BY_ROUTE)
-      if (method === PricingMethod.PRICE_BY_ROUTE) {
-        // Synthetic PRICE_BY_ROUTE doesn't exist — Kivunim uses the real report
-        const result = await validateMonthlyReport();
-        res.json({ success: true, data: result });
-        return;
-      }
-      const result = await validateMonthlyReport();
-      res.json({ success: true, data: result });
+    if (
+      method &&
+      method !== 'KIVUNIM' &&
+      method !== PricingMethod.PRICE_BY_ROUTE
+    ) {
+      res.status(400).json({
+        success: false,
+        error: 'Only Kivunim / PRICE_BY_ROUTE report validation is available',
+      });
       return;
     }
-
-    if (method === 'ALL_SYNTHETIC') {
-      const results = await validateAllSyntheticReports();
-      res.json({ success: true, data: results });
-      return;
-    }
-
-    if (!Object.values(PricingMethod).includes(method as PricingMethod)) {
-      res.status(400).json({ success: false, error: `Unknown pricing method: ${method}` });
-      return;
-    }
-
-    const result = await validateMethodReport(method as PricingMethod);
+    const result = await validateMonthlyReport();
     res.json({ success: true, data: result });
   } catch (error) {
     sendError(res, error);

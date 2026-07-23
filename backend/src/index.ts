@@ -9,6 +9,7 @@ import { authRouter } from './routes/auth.routes.js';
 import { catalogRouter } from './routes/catalog.routes.js';
 import { customerRouter } from './routes/customer.routes.js';
 import { logRouter } from './routes/log.routes.js';
+import { ituranRouter } from './routes/ituran.routes.js';
 import { pricingRouter } from './routes/pricing.routes.js';
 import { settingsRouter } from './routes/settings.routes.js';
 import { templateRouter } from './routes/template.routes.js';
@@ -33,6 +34,7 @@ app.use('/api/templates', templateRouter);
 app.use('/api/customers', customerRouter);
 app.use('/api/catalogs', catalogRouter);
 app.use('/api/pricing', pricingRouter);
+app.use('/api/ituran', ituranRouter);
 app.use('/api/logs', logRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/users', userRouter);
@@ -60,10 +62,6 @@ app.use((err: unknown, req: express.Request, res: express.Response, _next: expre
 
 void ensureSettings().catch((error) => {
   console.error('Failed to ensure app settings:', error);
-});
-
-void logService.seedDummyLogsIfNeeded().catch((error) => {
-  console.error('Failed to seed dummy logs:', error);
 });
 
 app.listen(env.PORT, () => {

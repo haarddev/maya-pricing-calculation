@@ -16,7 +16,7 @@ export async function calculatePrice(input: CalculatePriceInput) {
   return data.data;
 }
 
-export async function validateReport(method?: PricingMethod | 'KIVUNIM' | 'ALL_SYNTHETIC') {
+export async function validateReport(method?: PricingMethod | 'KIVUNIM') {
   const { data } = await apiClient.get<ApiResponse<ReportValidationResult>>('/api/pricing/validate-report', {
     params: method ? { method } : undefined,
   });

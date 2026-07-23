@@ -87,6 +87,31 @@
       "match": "Exact match",
       "mismatch": "Mismatch",
       "custom": "Custom quote"
+    },
+    "ituran": {
+      "title": "Ituran trip verify",
+      "hint": "Fetch GPS trips from Ituran by plate and date, match the Hebrew driver name, then price km + idle hours for Bus, Minibus, and Van (PRICE_BY_KM_AND_HOURS).",
+      "travelCode": "Travel code",
+      "date": "Date (M/D/YY)",
+      "startTime": "Start time",
+      "driverName": "Driver name (Hebrew)",
+      "vehicleNumber": "Vehicle / license plate",
+      "billedTotal": "Excel billed total (optional)",
+      "verify": "Verify with Ituran",
+      "matched": "Matched Ituran trip",
+      "noMatch": "No matching Ituran trip",
+      "km": "Km (distance)",
+      "hours": "Hours (idle ÷ 60)",
+      "idleMins": "Idle minutes",
+      "tripId": "Trip ID",
+      "ituranDriver": "Ituran driver",
+      "prices": "Km + hours prices",
+      "vsExcel": "Δ vs Excel",
+      "description": "Trip description (route)",
+      "duration": "Trip duration (H:MM:SS)",
+      "billedMatch": "matches Excel total",
+      "noCatalog": "No catalog match",
+      "bestMethod": "Closest method"
     }
   },
   "auth": {

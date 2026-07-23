@@ -7,15 +7,10 @@ import { prisma } from '../lib/prisma.js';
 import { AppError } from '../utils/errors.js';
 import { toNumber } from '../utils/catalog-pricing.js';
 import { createLog } from './log.service.js';
-import { DEMO_CUSTOMER_NAME, KIVUNIM_CUSTOMER_NAME } from '../constants/customers.js';
+import { KIVUNIM_CUSTOMER_NAME } from '../constants/customers.js';
 import { requireActiveCustomer } from './customer.service.js';
-import {
-  SYNTHETIC_FIXTURES,
-  getFixtureByMethod,
-  type SyntheticTrip,
-} from '../data/synthetic-price-lists.data.js';
 
-export { DEMO_CUSTOMER_NAME, KIVUNIM_CUSTOMER_NAME };
+export { KIVUNIM_CUSTOMER_NAME };
 
 const calculateSchema = z.object({
   /** Our internal Customer UUID — required; prices come from that customer's catalogs. */
@@ -486,117 +481,19 @@ export async function validateMonthlyReport() {
   return summarize(source, rows);
 }
 
-/** Validate a synthetic method fixture against the engine. */
-export async function validateMethodReport(method: PricingMethod) {
-  const fixture = getFixtureByMethod(method);
-  if (!fixture) {
-    throw new AppError(404, `No synthetic fixture for method ${method}`);
-  }
-
-  const rows: ReportValidationRow[] = [];
-
-  for (const trip of fixture.trips) {
-    rows.push(await validateSyntheticTrip(method, trip, fixture.templateName));
-  }
-
-  return summarize(fixture.templateName, rows);
-}
-
-/** Validate all synthetic methods (+ optionally list them). */
-export async function validateAllSyntheticReports() {
-  const results = [];
-  for (const fixture of SYNTHETIC_FIXTURES) {
-    results.push({
-      method: fixture.method,
-      templateName: fixture.templateName,
-      ...(await validateMethodReport(fixture.method)),
-    });
-  }
-  return results;
-}
-
 export function listPricingMethods() {
   return [
     {
       method: PricingMethod.PRICE_BY_ROUTE,
       label: 'Price by Route (Kivunim)',
-      hasSynthetic: false,
       hasKivunim: true,
     },
-    ...SYNTHETIC_FIXTURES.map((f) => ({
-      method: f.method,
-      label: f.templateName,
-      hasSynthetic: true,
+    {
+      method: PricingMethod.PRICE_BY_KM_AND_HOURS,
+      label: 'Km + Hours (MoD Masha)',
       hasKivunim: false,
-    })),
+    },
   ];
-}
-
-async function validateSyntheticTrip(
-  method: PricingMethod,
-  trip: SyntheticTrip,
-  templateName: string,
-): Promise<ReportValidationRow> {
-  const vehicleRaw =
-    typeof trip.request.vehicle_type === 'string' ? trip.request.vehicle_type : '';
-  const vehicle = vehicleRaw ? normalizeVehicleType(vehicleRaw) : null;
-
-  if (trip.custom) {
-    return {
-      date: trip.date,
-      startTime: trip.start_time,
-      description: trip.description,
-      vehicleRaw: vehicleRaw || '—',
-      vehicle,
-      billedPrice: trip.billed_price,
-      enginePrice: null,
-      catalogName: null,
-      status: 'custom',
-      request: trip.request,
-    };
-  }
-
-  try {
-    const customerId = await getCustomerIdByName(DEMO_CUSTOMER_NAME);
-    const template = await prisma.template.findFirst({ where: { name: templateName } });
-    const result = await calculateTripPrice(
-      {
-        customer_id: customerId,
-        pricing_method: method,
-        template_id: template?.id,
-        values: trip.request,
-      },
-      undefined,
-      { log: false },
-    );
-
-    const match = Math.abs(result.total_price - trip.billed_price) < 0.005;
-    return {
-      date: trip.date,
-      startTime: trip.start_time,
-      description: trip.description,
-      vehicleRaw: vehicleRaw || '—',
-      vehicle,
-      billedPrice: trip.billed_price,
-      enginePrice: result.total_price,
-      catalogName: result.catalog_name,
-      status: match ? 'match' : 'mismatch',
-      request: trip.request,
-    };
-  } catch {
-    return {
-      date: trip.date,
-      startTime: trip.start_time,
-      description: trip.description,
-      vehicleRaw: vehicleRaw || '—',
-      vehicle,
-      billedPrice: trip.billed_price,
-      enginePrice: null,
-      catalogName: null,
-      status: 'mismatch',
-      request: trip.request,
-    };
-  }
 }
 
 function summarize(source: string, rows: ReportValidationRow[]) {

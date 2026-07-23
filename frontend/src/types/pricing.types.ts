@@ -67,6 +67,5 @@ export type ReportValidationResult = {
 export type PricingMethodInfo = {
   method: PricingMethod | 'KIVUNIM';
   label: string;
-  hasSynthetic: boolean;
   hasKivunim: boolean;
 };
